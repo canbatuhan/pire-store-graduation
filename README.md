@@ -1,2 +1,2 @@
 # pire-store
-Repository for the project PiRe : Design of A Replicated State Machine Based Distributed Key Value Storage System
+Repository for the project PiRe : Design of A Replicated State Machine Based Distributed Key Value Storage System. `PiRe` is a cluster of Raspberry Pi 4 Model B single-board computers with capability of storing data distributed. More detail is to come...
