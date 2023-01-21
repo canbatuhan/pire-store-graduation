@@ -5,13 +5,17 @@ from pire.util.logger import Logger
 class LocalDatabase:
     def __init__(self, config_path:str) -> None:
         self.__db = pickledb.PickleDB(config_path, True, False)
-        self.__logger = Logger("LOCAL-DB")
+        self.__logger = Logger("Local-Database")
+
+    def start(self) -> None:
+        self.__logger.info("Started.")
 
     def create(self, key:object, value:object) -> bool:
         if self.__db.exists(key):
             old_value = self.__db.get(key)
             self.__db.set(key, value)
-            self.__logger.warning("Key '{}' already exists in local database -> '{}:{}'. It is updated as '{}:{}'".format(key, key, old_value, key, value))
+            self.__logger.warning("Key '{}' already exists in local database '{}:{}'.".format(key, key, old_value))
+            self.__logger.warning("Pair '{}:{}' is updated as '{}:{}'".format(key, old_value, key, value))
             
         else: # Key does not exist
             self.__db.set(key, value)
