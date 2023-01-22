@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package pirestore;
+
+service PireKeyValueStore {
+    rpc Greet (Greeting) returns (Ack) {}
+    rpc Read (Request) returns (Response) {}
+    rpc Prepare (Request) returns (Ack) {}
+    rpc Commit (Request) returns (Ack) {}
+    rpc Rollback (Request) returns (Ack) {}
+}
+
+message Greeting {
+    Address source = 10;
+    Address destination = 12;
+}
+
+message Request {
+    string command = 1;
+    bytes key = 2;
+    bytes value = 3;
+    string encoding = 4;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message Response {
+    bool success = 1;
+    bytes value = 2;
+    string encoding = 3;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message Ack {
+    bool success = 1;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message Address {
+    string host = 1;
+    int32 port = 2;
+}
