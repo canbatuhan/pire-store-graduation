@@ -9,9 +9,9 @@ class ReplicatedStateMachine:
         self.__logger = Logger("Replicated-State-Machine")
 
     def start(self) -> None:
+        self.__logger.info("Started.")
         self.__machine.start() # Start machine -> INIT
         self.trigger(Events.START) # INIT -> IDLE
-        self.__logger.info("Started.")
 
     def check(self, event:Events) -> bool:
         if self.__machine.check_event(event.value):

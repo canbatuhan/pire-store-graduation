@@ -9,6 +9,20 @@ from pire.util.constants import CLIENT_CONFIG_PATH
 
 class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
+    def __comm_handler_test(self) -> None:
+        self.__comm_handler.start()
+
+    def __statemachine_test(self) -> None:
+        self.__statemachine.start()
+
+    def __db_test(self) -> None:
+        self.__database.start()
+
+    def test_components(self) -> None:
+        self.__comm_handler_test()
+        self.__statemachine_test()
+        self.__db_test()
+
     def __init__(self, client_id:str) -> None:
         file = open(CLIENT_CONFIG_PATH, 'r')
         config_paths = dict(json.load(file))
@@ -28,9 +42,3 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def Rollback(self, request, context):
         return super().Rollback(request, context)
-
-    def server_thread(self) -> None:
-        pass
-
-    def client_thread(self) -> None:
-        pass

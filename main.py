@@ -1,4 +1,4 @@
 from pire.client import PireClient
 
-c = PireClient("PiRe-01")
-c.statemachine_test()
+c = PireClient("PiRe-00")
+c.test_components()
