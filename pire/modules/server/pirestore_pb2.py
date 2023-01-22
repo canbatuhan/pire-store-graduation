@@ -14,14 +14,22 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpirestore.proto\x12\tpirestore\"\x95\x01\n\x07Request\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\r\n\x05value\x18\x03 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x04 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x89\x01\n\x08Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"c\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32\xd9\x01\n\x11PireKeyValueStore\x12\x31\n\x04Read\x12\x12.pirestore.Request\x1a\x13.pirestore.Response\"\x00\x12/\n\x07Prepare\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12.\n\x06\x43ommit\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12\x30\n\x08Rollback\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0fpirestore.proto\x12\tpirestore\"W\n\x08Greeting\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x95\x01\n\x07Request\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\r\n\x05value\x18\x03 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x04 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x89\x01\n\x08Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"c\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32\x89\x02\n\x11PireKeyValueStore\x12.\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x0e.pirestore.Ack\"\x00\x12\x31\n\x04Read\x12\x12.pirestore.Request\x1a\x13.pirestore.Response\"\x00\x12/\n\x07Prepare\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12.\n\x06\x43ommit\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12\x30\n\x08Rollback\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x62\x06proto3')
 
 
 
+_GREETING = DESCRIPTOR.message_types_by_name['Greeting']
 _REQUEST = DESCRIPTOR.message_types_by_name['Request']
 _RESPONSE = DESCRIPTOR.message_types_by_name['Response']
 _ACK = DESCRIPTOR.message_types_by_name['Ack']
 _ADDRESS = DESCRIPTOR.message_types_by_name['Address']
+Greeting = _reflection.GeneratedProtocolMessageType('Greeting', (_message.Message,), {
+  'DESCRIPTOR' : _GREETING,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.Greeting)
+  })
+_sym_db.RegisterMessage(Greeting)
+
 Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
   'DESCRIPTOR' : _REQUEST,
   '__module__' : 'pirestore_pb2'
@@ -54,14 +62,16 @@ _PIREKEYVALUESTORE = DESCRIPTOR.services_by_name['PireKeyValueStore']
 if _descriptor._USE_C_DESCRIPTORS == False:
 
   DESCRIPTOR._options = None
-  _REQUEST._serialized_start=31
-  _REQUEST._serialized_end=180
-  _RESPONSE._serialized_start=183
-  _RESPONSE._serialized_end=320
-  _ACK._serialized_start=322
-  _ACK._serialized_end=421
-  _ADDRESS._serialized_start=423
-  _ADDRESS._serialized_end=460
-  _PIREKEYVALUESTORE._serialized_start=463
-  _PIREKEYVALUESTORE._serialized_end=680
+  _GREETING._serialized_start=30
+  _GREETING._serialized_end=117
+  _REQUEST._serialized_start=120
+  _REQUEST._serialized_end=269
+  _RESPONSE._serialized_start=272
+  _RESPONSE._serialized_end=409
+  _ACK._serialized_start=411
+  _ACK._serialized_end=510
+  _ADDRESS._serialized_start=512
+  _ADDRESS._serialized_end=549
+  _PIREKEYVALUESTORE._serialized_start=552
+  _PIREKEYVALUESTORE._serialized_end=817
 # @@protoc_insertion_point(module_scope)

@@ -1,8 +1,0 @@
-[Communication-Handler] 23/01/22 12:48:27.188697 - INFO : Started.
-[Communication-Handler] 23/01/22 12:48:27.188697 - FAIL : Failed to connect to 127.0.0.1:8010. Node might be unawake.
-[Communication-Handler] 23/01/22 12:48:27.189697 - FAIL : Failed to connect to 127.0.0.1:8020. Node might be unawake.
-[Communication-Handler] 23/01/22 12:48:27.189697 - FAIL : Failed to connect to 127.0.0.1:8030. Node might be unawake.
-[Communication-Handler] 23/01/22 12:48:27.190697 - FAIL : Failed to connect to 127.0.0.1:8040. Node might be unawake.
-[Replicated-State-Machine] 23/01/22 12:48:27.190697 - INFO : Started.
-[Replicated-State-Machine] 23/01/22 12:48:27.191697 - SUCCESS : Event 'START' triggered the machine 'S_INIT -IDLE-> START'.
-[Local-Database] 23/01/22 12:48:27.191697 - INFO : Started.

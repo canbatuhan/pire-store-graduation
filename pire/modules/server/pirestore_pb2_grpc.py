@@ -14,6 +14,11 @@ class PireKeyValueStoreStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.Greet = channel.unary_unary(
+                '/pirestore.PireKeyValueStore/Greet',
+                request_serializer=pirestore__pb2.Greeting.SerializeToString,
+                response_deserializer=pirestore__pb2.Ack.FromString,
+                )
         self.Read = channel.unary_unary(
                 '/pirestore.PireKeyValueStore/Read',
                 request_serializer=pirestore__pb2.Request.SerializeToString,
@@ -38,6 +43,12 @@ class PireKeyValueStoreStub(object):
 
 class PireKeyValueStoreServicer(object):
     """Missing associated documentation comment in .proto file."""
+
+    def Greet(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Read(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -66,6 +77,11 @@ class PireKeyValueStoreServicer(object):
 
 def add_PireKeyValueStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'Greet': grpc.unary_unary_rpc_method_handler(
+                    servicer.Greet,
+                    request_deserializer=pirestore__pb2.Greeting.FromString,
+                    response_serializer=pirestore__pb2.Ack.SerializeToString,
+            ),
             'Read': grpc.unary_unary_rpc_method_handler(
                     servicer.Read,
                     request_deserializer=pirestore__pb2.Request.FromString,
@@ -95,6 +111,23 @@ def add_PireKeyValueStoreServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class PireKeyValueStore(object):
     """Missing associated documentation comment in .proto file."""
+
+    @staticmethod
+    def Greet(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Greet',
+            pirestore__pb2.Greeting.SerializeToString,
+            pirestore__pb2.Ack.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def Read(request,
