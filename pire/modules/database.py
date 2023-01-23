@@ -1,4 +1,5 @@
 import pickledb
+from typing import Tuple
 
 from pire.util.logger import Logger
 
@@ -23,7 +24,7 @@ class LocalDatabase:
 
         return self.__db.exists(key)
 
-    def read(self, key:object) -> tuple[bool,object]:
+    def read(self, key:object) -> Tuple[bool,object]:
         if self.__db.exists(key):
             value = self.__db.get(key)
             self.__logger.success("Key '{}' is found, Value '{}' is read.".format(key, value))
