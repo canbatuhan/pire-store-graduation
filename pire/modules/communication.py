@@ -10,12 +10,12 @@ from pire.util.constants import BUFFER_SIZE, ENCODING
 
 
 class ClusterHandler:
-    def __init__(self, host:str, grpc_port:int, neighbours_addr:Iterable[Tuple[str,int]]) -> None:
+    def __init__(self, client_id:str, host:str, grpc_port:int, neighbours_addr:Iterable[Tuple[str,int]]) -> None:
         self.__host = host
         self.__grpc_port = grpc_port
         self.__neighbours_addr = neighbours_addr
         self.__neighbours = dict()
-        self.__logger = Logger("Communication-Handler-Cluster-Handler")
+        self.__logger = Logger("Communication-Handler-Cluster-Handler", client_id)
 
     def __send_greetings(self) -> None:
         for addr, channel in self.__neighbours.items():
@@ -43,11 +43,11 @@ class ClusterHandler:
 
 
 class UserRequestHandler:
-    def __init__(self, host, ui_port) -> None:
+    def __init__(self, client_id:str, host:str, ui_port:int) -> None:
         self.__host = host
         self.__ui_port = ui_port
         self.__ui_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__logger = Logger("Communication-Handler-User-Request-Handler")
+        self.__logger = Logger("Communication-Handler-User-Request-Handler", client_id)
 
     def start(self) -> None:
         self.__ui_socket.bind((self.__host, self.__ui_port))
@@ -75,7 +75,7 @@ class UserRequestHandler:
 
 
 class CommunicationHandler:
-    def __configure(self, config_path:str, client_id:str) -> None:
+    def __configure(self, client_id:str, config_path:str) -> None:
         topology_config:List[dict] = json.load(open(config_path, 'r'))
         for node_config in topology_config:
             if node_config.get("id") == client_id:
@@ -85,15 +85,15 @@ class CommunicationHandler:
                     addr = (neighbour.get("host"), neighbour.get("port"))
                     self.__neighbours_addr.append(addr)
 
-    def __init__(self, config_path:str, client_id:str) -> None:
-        self.__config_path = config_path
+    def __init__(self, client_id:str, config_path:str) -> None:
         self.__client_id = client_id
+        self.__config_path = config_path
         self.__host, self.__port = str(), int() 
         self.__neighbours_addr:List[Tuple[str,int]] = list()
-        self.__configure(self.__config_path, self.__client_id)
-        self.__cluster_handler = ClusterHandler(self.__host, self.__port, self.__neighbours_addr)
-        self.__user_request_handler = UserRequestHandler(self.__host, self.__port+1)
-        self.__logger = Logger("Communication-Handler")
+        self.__configure(self.__client_id, self.__config_path)
+        self.__cluster_handler = ClusterHandler(self.__client_id, self.__host, self.__port, self.__neighbours_addr)
+        self.__user_request_handler = UserRequestHandler(self.__client_id, self.__host, self.__port+1)
+        self.__logger = Logger("Communication-Handler", self.__client_id)
 
     def get_address(self) -> Tuple[Tuple[str,int],Tuple[str,int]]:
         return (self.__host, self.__port), (self.__host, self.__port+5)

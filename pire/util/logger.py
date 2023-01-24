@@ -4,8 +4,8 @@ from pire.util.constants import LOG_FILE_PATH
 
 
 class Logger:
-    def __init__(self, component:str) -> None:
-        self.__file_path = LOG_FILE_PATH
+    def __init__(self, component:str, client_id:str) -> None:
+        self.__file_path = LOG_FILE_PATH(client_id)
         self.__component = component
 
     def __timestamp(self) -> str:

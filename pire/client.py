@@ -17,9 +17,9 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         config_paths = dict(json.load(file))
         self.__id = client_id
         self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
-        self.__comm_handler = CommunicationHandler(config_paths.get("topology"), self.__id)
-        self.__statemachine = ReplicatedStateMachine(config_paths.get("statemachine"))
-        self.__database = LocalDatabase(config_paths.get("database"))
+        self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
+        self.__statemachine = ReplicatedStateMachine(self.__id, config_paths.get("statemachine"))
+        self.__database = LocalDatabase(self.__id)
         
     def Greet(self, request, context):
         grpc_addr, _ = self.__comm_handler.get_address() 

@@ -1,12 +1,13 @@
 import pickledb
 from typing import Tuple
 
+from pire.util.constants import LOCAL_DB_PATH
 from pire.util.logger import Logger
 
 class LocalDatabase:
-    def __init__(self, config_path:str) -> None:
-        self.__db = pickledb.PickleDB(config_path, True, False)
-        self.__logger = Logger("Local-Database")
+    def __init__(self, client_id:str) -> None:
+        self.__db = pickledb.PickleDB(LOCAL_DB_PATH(client_id), False)
+        self.__logger = Logger("Local-Database", client_id)
 
     def start(self) -> None:
         self.__logger.info("Started.")

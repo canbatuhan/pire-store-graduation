@@ -4,9 +4,9 @@ from pire.util.logger import Logger
 from pire.util.enums import Events
 
 class ReplicatedStateMachine:
-    def __init__(self, config_path:str) -> None:
+    def __init__(self, client_str:str, config_path:str) -> None:
         self.__machine = FiniteStateMachine(config_path)
-        self.__logger = Logger("Replicated-State-Machine")
+        self.__logger = Logger("Replicated-State-Machine", client_str)
 
     def start(self) -> None:
         self.__logger.info("Started.")

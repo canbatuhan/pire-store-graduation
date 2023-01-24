@@ -1,5 +1,4 @@
 {
     "statemachine": "pire/configuration/statemachine/config.json",
-    "topology": "pire/configuration/topology/config.json",
-    "database": "pire/docs/local.db"
+    "topology": "pire/configuration/topology/config.json"
 }
