@@ -4,10 +4,7 @@ package pirestore;
 
 service PireKeyValueStore {
     rpc Greet (Greeting) returns (Ack) {}
-    rpc Read (Request) returns (Response) {}
-    rpc Prepare (Request) returns (Ack) {}
-    rpc Commit (Request) returns (Ack) {}
-    rpc Rollback (Request) returns (Ack) {}
+    rpc Create (Request) returns (Ack) {}
 }
 
 message Greeting {

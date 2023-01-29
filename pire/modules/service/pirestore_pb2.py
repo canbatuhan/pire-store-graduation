@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\"W\n\x08Greeting\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x95\x01\n\x07Request\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\r\n\x05value\x18\x03 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x04 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x89\x01\n\x08Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"c\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32\x89\x02\n\x11PireKeyValueStore\x12.\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x0e.pirestore.Ack\"\x00\x12\x31\n\x04Read\x12\x12.pirestore.Request\x1a\x13.pirestore.Response\"\x00\x12/\n\x07Prepare\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12.\n\x06\x43ommit\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12\x30\n\x08Rollback\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\"W\n\x08Greeting\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x95\x01\n\x07Request\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\r\n\x05value\x18\x03 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x04 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x89\x01\n\x08Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"c\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32s\n\x11PireKeyValueStore\x12.\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x0e.pirestore.Ack\"\x00\x12.\n\x06\x43reate\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x62\x06proto3'
 )
 
 
@@ -334,8 +334,8 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=552,
-  serialized_end=817,
+  serialized_start=551,
+  serialized_end=666,
   methods=[
   _descriptor.MethodDescriptor(
     name='Greet',
@@ -348,39 +348,9 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='Read',
-    full_name='pirestore.PireKeyValueStore.Read',
+    name='Create',
+    full_name='pirestore.PireKeyValueStore.Create',
     index=1,
-    containing_service=None,
-    input_type=_REQUEST,
-    output_type=_RESPONSE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Prepare',
-    full_name='pirestore.PireKeyValueStore.Prepare',
-    index=2,
-    containing_service=None,
-    input_type=_REQUEST,
-    output_type=_ACK,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Commit',
-    full_name='pirestore.PireKeyValueStore.Commit',
-    index=3,
-    containing_service=None,
-    input_type=_REQUEST,
-    output_type=_ACK,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Rollback',
-    full_name='pirestore.PireKeyValueStore.Rollback',
-    index=4,
     containing_service=None,
     input_type=_REQUEST,
     output_type=_ACK,

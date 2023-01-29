@@ -19,23 +19,8 @@ class PireKeyValueStoreStub(object):
                 request_serializer=pirestore__pb2.Greeting.SerializeToString,
                 response_deserializer=pirestore__pb2.Ack.FromString,
                 )
-        self.Read = channel.unary_unary(
-                '/pirestore.PireKeyValueStore/Read',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Response.FromString,
-                )
-        self.Prepare = channel.unary_unary(
-                '/pirestore.PireKeyValueStore/Prepare',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Ack.FromString,
-                )
-        self.Commit = channel.unary_unary(
-                '/pirestore.PireKeyValueStore/Commit',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Ack.FromString,
-                )
-        self.Rollback = channel.unary_unary(
-                '/pirestore.PireKeyValueStore/Rollback',
+        self.Create = channel.unary_unary(
+                '/pirestore.PireKeyValueStore/Create',
                 request_serializer=pirestore__pb2.Request.SerializeToString,
                 response_deserializer=pirestore__pb2.Ack.FromString,
                 )
@@ -50,25 +35,7 @@ class PireKeyValueStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Read(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Prepare(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Commit(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Rollback(self, request, context):
+    def Create(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -82,23 +49,8 @@ def add_PireKeyValueStoreServicer_to_server(servicer, server):
                     request_deserializer=pirestore__pb2.Greeting.FromString,
                     response_serializer=pirestore__pb2.Ack.SerializeToString,
             ),
-            'Read': grpc.unary_unary_rpc_method_handler(
-                    servicer.Read,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Response.SerializeToString,
-            ),
-            'Prepare': grpc.unary_unary_rpc_method_handler(
-                    servicer.Prepare,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Ack.SerializeToString,
-            ),
-            'Commit': grpc.unary_unary_rpc_method_handler(
-                    servicer.Commit,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Ack.SerializeToString,
-            ),
-            'Rollback': grpc.unary_unary_rpc_method_handler(
-                    servicer.Rollback,
+            'Create': grpc.unary_unary_rpc_method_handler(
+                    servicer.Create,
                     request_deserializer=pirestore__pb2.Request.FromString,
                     response_serializer=pirestore__pb2.Ack.SerializeToString,
             ),
@@ -130,7 +82,7 @@ class PireKeyValueStore(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def Read(request,
+    def Create(request,
             target,
             options=(),
             channel_credentials=None,
@@ -140,58 +92,7 @@ class PireKeyValueStore(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Read',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Response.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Prepare(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Prepare',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Ack.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Commit(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Commit',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Ack.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Rollback(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Rollback',
+        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Create',
             pirestore__pb2.Request.SerializeToString,
             pirestore__pb2.Ack.FromString,
             options, channel_credentials,
