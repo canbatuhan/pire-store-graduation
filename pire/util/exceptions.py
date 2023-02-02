@@ -6,3 +6,6 @@ class ServiceUndefinedException(Exception):
 
 class PollingTimeoutException(Exception):
     pass
+
+class InvalidRequestType(Exception):
+    pass

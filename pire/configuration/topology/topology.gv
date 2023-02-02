@@ -1,20 +1,16 @@
 digraph G {
     /* 1 NODES */
-    "PiRe-00" [height=2 width=2 color="#252525" fontcolor="#252525"]
-    "PiRe-01" [height=2 width=2 color="#252525" fontcolor="#252525"]
-    "PiRe-02" [height=2 width=2 color="#252525" fontcolor="#252525"]
-    "PiRe-03" [height=2 width=2 color="#252525" fontcolor="#252525"]
-    "PiRe-04" [height=2 width=2 color="#252525" fontcolor="#252525"]
+    "PiRe-00" [height=1 width=1]
+    "PiRe-01" [height=1 width=1]
+    "PiRe-02" [height=1 width=1]
+    "PiRe-03" [height=1 width=1]
+    "PiRe-04" [height=1 width=1]
 
     /* 2 CONNECTIONS */
-    "PiRe-00" -> "PiRe-01" [dir="both" color="#ffaf01"]
-    "PiRe-00" -> "PiRe-02" [dir="both" color="#ffaf01"]
-    "PiRe-00" -> "PiRe-03" [dir="both" color="#01a817"]
-    "PiRe-00" -> "PiRe-04" [dir="both" color="#cc0000"]
-    "PiRe-01" -> "PiRe-02" [dir="both" color="#01a817"]
-    "PiRe-01" -> "PiRe-03" [dir="both" color="#cc0000"]
-    "PiRe-01" -> "PiRe-04" [dir="both" color="#01a817"]
-    "PiRe-02" -> "PiRe-03" [dir="both" color="#01a817"]
-    "PiRe-02" -> "PiRe-04" [dir="both" color="#ffaf01"]
-    "PiRe-03" -> "PiRe-04" [dir="both" color="#ffaf01"]
+    "PiRe-00" -> "PiRe-01" [arrowhead="both"]
+    "PiRe-00" -> "PiRe-02" [arrowhead="both"]
+    "PiRe-01" -> "PiRe-03" [arrowhead="both"]
+    "PiRe-02" -> "PiRe-03" [arrowhead="both"]
+    "PiRe-02" -> "PiRe-04" [arrowhead="both"]
+    "PiRe-03" -> "PiRe-04" [arrowhead="both"]
 } 

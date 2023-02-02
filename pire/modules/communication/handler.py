@@ -30,9 +30,6 @@ class CommunicationHandler:
     def get_address(self) -> Tuple[Tuple[str,int],Tuple[str,int]]:
         return (self.__host, self.__port), (self.__host, self.__port+5)
 
-    def accept_greeting(self, addr:Tuple[str,int]) -> None:
-        self.cluster_handler.accept_greeting_callback(addr)
-
     def start(self) -> None:
         self.__logger.info("Started.")
         self.cluster_handler.start()

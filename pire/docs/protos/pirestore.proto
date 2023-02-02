@@ -13,10 +13,12 @@ message Greeting {
 }
 
 message Request {
-    string command = 1;
-    bytes key = 2;
-    bytes value = 3;
-    string encoding = 4;
+    int32 id = 1;
+    int32 replica_no = 2;
+    string command = 3;
+    bytes key = 4;
+    bytes value = 5;
+    string encoding = 6;
     Address source = 10;
     Address destination = 12;
 }

@@ -1,3 +1,4 @@
+from typing import List, Tuple
 import grpc
 import json
 import random
@@ -10,9 +11,9 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_ID, N_REPLICAS
 from pire.util.enums import Events
-from pire.util.exceptions import ConnectionLostException, PollingTimeoutException
+from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
 
 class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
@@ -25,24 +26,81 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
         self.__statemachine = ReplicatedStateMachine(self.__id, config_paths.get("statemachine"))
         self.__database = LocalDatabase(self.__id)
+        self.__history:List[int] = list()
         
     def Greet(self, request, context):
         grpc_addr, _ = self.__comm_handler.get_address() 
         dst_addr = (request.destination.host, request.destination.port)
+        src_addr = (request.source.host, request.source.port)
+
         if grpc_addr == dst_addr:
-            self.__comm_handler.accept_greeting(dst_addr)
+            self.__comm_handler.cluster_handler.accept_greeting(src_addr)
             return pirestore_pb2.Ack(
                 success=True,
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
-                destination=pirestore_pb2.Address(host=request.destination.host, port=request.destination.port))  
+                destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))  
+
         else: # Destination address is different
             return pirestore_pb2.Ack(
                 success=False,
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
-                destination=pirestore_pb2.Address(host=request.destination.host, port=request.destination.port))
+                destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
 
     def Create(self, request, context):
-        return super().Create(request, context)
+        grpc_addr, _ = self.__comm_handler.get_address()
+        success = False
+
+        if request.id not in self.__history:
+            if request.command == Events.CREATE.value:
+                self.__statemachine.poll(Events.CREATE)
+                self.__statemachine.trigger(Events.CREATE)
+                success = self.__database.create(
+                    request.key.decode(request.encoding),
+                    request.value.decode(request.encoding))
+                self.__statemachine.trigger(Events.DONE)
+
+            elif request.command == Events.CREATE_REDIR.value:
+                success = self.__comm_handler.cluster_handler.run_redirect_protocol(request)
+            
+            self.__history.append(request.id)
+
+        return pirestore_pb2.Ack(
+                success=success,
+                source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
+                destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
+
+    def __handle_request(self, event:Events, key:bytes, value:bytes) -> object:
+        cluster_handler = self.__comm_handler.cluster_handler
+        replica_no = 0
+
+        # Read operation
+        if event == Events.READ:
+            success, read_value = self.__database.read(
+                key.decode(ENCODING))
+            if success: # If key-value pair is found
+                return read_value
+
+        # Write operations
+        if event == Events.CREATE:
+            success = self.__database.create(
+                key.decode(ENCODING), value.decode(ENCODING))
+
+        elif event == Events.UPDATE:
+            success = self.__database.update(
+                key.decode(ENCODING), value.decode(ENCODING))
+
+        elif event == Events.DELETE:
+            success = self.__database.delete(
+                key.decode(ENCODING))
+
+        if success: # Successful write operations
+            replica_no += 1
+
+        # Run corresponding protocol
+        random_id = random.choice(range(0, int(MAX_ID)))
+        self.__history.append(random_id)
+        response = cluster_handler.run_main_protocol(random_id, replica_no, event, key, value)
+        return response
 
     def start(self):
         self.__comm_handler.start()
@@ -58,13 +116,13 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def __user_thread(self) -> None:
         user_handler = self.__comm_handler.user_request_handler
-        cluster_handler = self.__comm_handler.cluster_handler
+
         while True:
             connection, addr = user_handler.establish_connection()
             while True: # Until someone exits
                 try: # Handle user requests
                     request = user_handler.receive_request(connection, addr)
-                    if request.lower() == "exit":
+                    if request.lower() == b"exit":
                         user_handler.close_connection(connection, addr)
                         break
 
@@ -72,7 +130,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     self.__statemachine.poll(event)
 
                     self.__statemachine.trigger(event)
-                    ack = cluster_handler.execute(event, key, value)
+                    ack = self.__handle_request(event, key, value)
 
                     user_handler.send_ack(connection, addr, ack)
                     self.__statemachine.trigger(Events.DONE)
@@ -80,8 +138,11 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 except PollingTimeoutException: # Try to receive/close
                     user_handler.close_connection(connection, addr)
 
+                except InvalidRequestType:
+                    user_handler.send_ack(connection, addr, "Invalid request type")
+                        
                 except ConnectionLostException:
-                    pass
+                    break
 
     def run(self):
         Thread(target=self.__grpc_thread).start()

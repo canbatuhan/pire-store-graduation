@@ -4,7 +4,8 @@ LOCAL_DB_PATH = lambda client_id : "pire/docs/databases/{}_local.db".format(clie
 LOG_FILE_PATH = lambda client_id : "pire/docs/logs/{}_log.txt".format(client_id)
 
 # Cluster Constants
-N_REPLICAS = 4
+MAX_ID = 1E+4
+N_REPLICAS = 3
 
 # State Machine Constants
 INITIAL_POLL_TIME = 5.2e-9 # 52 nanoseconds
