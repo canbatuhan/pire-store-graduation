@@ -6,6 +6,7 @@ service PireKeyValueStore {
     rpc Greet (Greeting) returns (Ack) {}
     rpc Create (Request) returns (Ack) {}
     rpc Read (Request) returns (Response) {}
+    rpc Update (Request) returns (Ack) {}
 }
 
 message Greeting {
