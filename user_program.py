@@ -9,7 +9,7 @@ user_socket.bind(("127.0.0.1", 9000))
 def get_input() -> int:
     print("-"*40)
     print("Select client to send request:")
-    for count in range(10):
+    for count in range(5):
         print("{}. PiRe-0{}".format(count, count))
     return int(input("Selection: "))
 
@@ -19,15 +19,17 @@ def get_address(pire_id:int) -> Tuple[str,int]:
 while True:
     pire_id = get_input()
     host, port = get_address(pire_id)
-    user_socket.connect((host, port))
-    while True:
-        try:
-            request = input("Your request: ").encode(ENCODING)
-            if request == "exit":
+    try: # Try to connect
+        user_socket.connect((host, port))
+        while True:
+            try:
+                request = input("Your request: ")
+                user_socket.send(request.encode(ENCODING))
+                if request == "exit":
+                    break
+                ack = user_socket.recv(1024)
+                print("ACK = {}".format(ack.decode(ENCODING)))
+            except:
                 break
-            user_socket.send(request)
-            ack = user_socket.recv(1024)
-            print("ACK = {}".format(ack.decode(ENCODING)))
-        except:
-            break
-    user_socket.close()
+    except: # Failed to connect
+        print("Node not available")

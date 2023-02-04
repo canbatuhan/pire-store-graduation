@@ -51,25 +51,58 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         success = False
 
         if request.id not in self.__history:
+            self.__history.append(request.id)
+
             if request.command == Events.CREATE.value:
                 self.__statemachine.poll(Events.CREATE)
-                self.__statemachine.trigger(Events.CREATE)
+                self.__statemachine.trigger(Events.CREATE)              
                 success = self.__database.create(
                     request.key.decode(request.encoding),
                     request.value.decode(request.encoding))
                 self.__statemachine.trigger(Events.DONE)
 
             elif request.command == Events.CREATE_REDIR.value:
-                success = self.__comm_handler.cluster_handler.run_redirect_protocol(request)
-            
-            self.__history.append(request.id)
+                self.__statemachine.poll(Events.CREATE)
+                self.__statemachine.trigger(Events.CREATE)  
+                success = self.__comm_handler.cluster_handler.run_replication_protocol(request)
+                self.__statemachine.trigger(Events.DONE)
 
         return pirestore_pb2.Ack(
                 success=success,
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
 
-    def __handle_request(self, event:Events, key:bytes, value:bytes) -> object:
+    def Read(self, request, context):
+        grpc_addr, _ = self.__comm_handler.get_address()
+        read_success = False
+        read_value = None
+
+        if request.id not in self.__history:
+            self.__history.append(request.id)
+
+            if request.command == Events.READ.value:
+                self.__statemachine.poll(Events.READ)
+                self.__statemachine.trigger(Events.READ)
+                read_success, read_value = self.__database.read(
+                    request.key.decode(request.encoding))
+
+                if read_success: # Found in local
+                    read_value = read_value.encode(ENCODING)
+
+                else: # Can not found in local
+                    read_success, read_value = self.__comm_handler.cluster_handler.run_main_protocol(
+                        request.id, None, Events.READ, request.key, request.value)
+                
+                self.__statemachine.trigger(Events.DONE)
+                    
+        return pirestore_pb2.Response(
+            success=read_success,
+            value=read_value,
+            encoding=ENCODING,
+            source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
+            destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
+
+    def __handle_request(self, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
         cluster_handler = self.__comm_handler.cluster_handler
         replica_no = 0
 
@@ -78,7 +111,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             success, read_value = self.__database.read(
                 key.decode(ENCODING))
             if success: # If key-value pair is found
-                return read_value
+                return True, read_value
 
         # Write operations
         if event == Events.CREATE:
@@ -99,8 +132,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         # Run corresponding protocol
         random_id = random.choice(range(0, int(MAX_ID)))
         self.__history.append(random_id)
-        response = cluster_handler.run_main_protocol(random_id, replica_no, event, key, value)
-        return response
+        success, value = cluster_handler.run_main_protocol(random_id, replica_no, event, key, value)
+        return success, value
 
     def start(self):
         self.__comm_handler.start()
@@ -130,9 +163,9 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     self.__statemachine.poll(event)
 
                     self.__statemachine.trigger(event)
-                    ack = self.__handle_request(event, key, value)
+                    ack, read_value = self.__handle_request(event, key, value)
 
-                    user_handler.send_ack(connection, addr, ack)
+                    user_handler.send_ack(connection, addr, ack, read_value)
                     self.__statemachine.trigger(Events.DONE)
 
                 except PollingTimeoutException: # Try to receive/close

@@ -50,7 +50,8 @@ class UserHandler:
         elif re.match(read_pattern, request_as_str):
             match = re.match(read_pattern, request_as_str)
             return (Events.READ,
-                    match.group(1).encode(ENCODING))
+                    match.group(1).encode(ENCODING),
+                    None)
 
         elif re.match(update_pattern, request_as_str):
             match = re.match(update_pattern, request_as_str)
@@ -61,18 +62,22 @@ class UserHandler:
         elif re.match(delete_pattern, request_as_str):
             match = re.match(delete_pattern, request_as_str)
             return (Events.DELETE,
-                    match.group(1).encode(ENCODING))
+                    match.group(1).encode(ENCODING),
+                    None)
 
         else: # User entered invalid request
             raise InvalidRequestType()
 
-    def send_ack(self, connection:socket.socket, addr:Tuple[str,int], ack:str) -> None:
+    def send_ack(self, connection:socket.socket, addr:Tuple[str,int], ack:bool, value:bytes) -> None:
         try: # Try to send
-            if ack == True:
-                connection.send("Success".encode(ENCODING))
-            elif ack == False:
-                connection.send("Failure".encode(ENCODING))
-            self.__logger.info("{}:{} is acknowledged '{}'".format(*addr, ack))
+            ack_msg = None
+            if ack == True and value == None: ack_msg = "Success"
+            elif ack == True and value != None: ack_msg = "Succes, value={}".format(value)
+            elif ack == False: ack_msg = "Failure"
+            
+            connection.send(ack_msg.encode(ENCODING))
+            self.__logger.info("{}:{} is acknowledged '{}'".format(*addr, ack_msg))
+            
         except: # Fail to send
             self.__logger.failure("Connection with {}:{} is lost.".format(*addr))
             raise ConnectionLostException()

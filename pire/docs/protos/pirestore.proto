@@ -5,6 +5,7 @@ package pirestore;
 service PireKeyValueStore {
     rpc Greet (Greeting) returns (Ack) {}
     rpc Create (Request) returns (Ack) {}
+    rpc Read (Request) returns (Response) {}
 }
 
 message Greeting {

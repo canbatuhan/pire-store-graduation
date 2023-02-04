@@ -36,9 +36,6 @@ class ClusterHandler:
 
     def __call_create_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> bool:
         try: # Try to send a message
-            if src_addr == None:
-                src_addr == (self.__host, self.__grpc_port)
-
             channel = self.__neighbours.get(dst_addr)
             stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
             response = stub.Create(pirestore_pb2.Request(
@@ -51,6 +48,21 @@ class ClusterHandler:
         except Exception as e: # Channel is broken
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return False
+        
+    def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, event:Events.READ, key:bytes) -> Tuple[bool, bytes]:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Read(pirestore_pb2.Request(
+                id=request_id, command=event.value,
+                key=key, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            return response.success, response.value
+
+        except Exception as e: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return False, None
 
     def _create_main_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
         # Send execute message to only one neighbour
@@ -87,8 +99,22 @@ class ClusterHandler:
                 return True
         
         return False
+    
+    def _read_main_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
+        random.shuffle(self.__neighbours_addr)
+        for dst_addr in self.__neighbours_addr:
+            success, read_value = self.__call_read_service(
+                (self.__host, self.__grpc_port), dst_addr,
+                request_id, Events.READ, key)
+            self.__logger.info("Read-Main-Protocol is on action, sending '{}' to {}:{}...".format(
+                Events.READ.value, *dst_addr))
+            if success: # Found
+                self.__logger.info("Pair '{}:{}' is found in {}:{}".format(
+                    key.decode(ENCODING), read_value.decode(ENCODING), self.__host, self.__grpc_port))
+                return success, read_value
+        return False, None
 
-    def _create_redirect_protocol(self, request:pirestore_pb2.Request) -> bool:
+    def _create_replication_protocol(self, request:pirestore_pb2.Request) -> bool:
         # Send execute message to only one neighbour
         random.shuffle(self.__neighbours_addr)
         replica_no = request.replica_no
@@ -133,16 +159,22 @@ class ClusterHandler:
         self.__neighbours.update({addr:channel})
         self.__logger.info("Greeted with {}:{}.".format(*addr))
 
-    def run_main_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> bool:
+    def run_main_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
         success = False
+        read_value = None
+
         if event == Events.CREATE:
             success = self._create_main_protocol(request_id, replica_no, key, value)
-        return success
 
-    def run_redirect_protocol(self, request:pirestore_pb2.Request) -> bool:
+        elif event == Events.READ:
+            success, read_value = self._read_main_protocol(request_id, key)
+
+        return success, read_value
+
+    def run_replication_protocol(self, request:pirestore_pb2.Request) -> bool:
         success = False
         if request.command == Events.CREATE_REDIR.value:
-            success = self._create_redirect_protocol(request)
+            success = self._create_replication_protocol(request)
         return success
 
     def start(self) -> None:
