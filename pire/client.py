@@ -22,7 +22,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         file = open(CLIENT_CONFIG_PATH, 'r')
         config_paths = dict(json.load(file))
         self.__id = client_id
-        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
+        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
         self.__statemachine = ReplicatedStateMachine(self.__id, config_paths.get("statemachine"))
         self.__database = LocalDatabase(self.__id)
@@ -50,13 +50,13 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         grpc_addr, _ = self.__comm_handler.get_address()
         success = False
 
-        # Trigger the state machine
-        self.__statemachine.poll(Events.CREATE)
-        self.__statemachine.trigger(Events.CREATE)
-
-        # First time of processing
+        # First time processing
         if request.id not in self.__history:
             self.__history.append(request.id)
+
+            # Trigger the state machine
+            self.__statemachine.poll(Events.CREATE)
+            self.__statemachine.trigger(Events.CREATE)
 
             # Try to create in local
             if request.command == Events.CREATE.value:           
@@ -68,10 +68,11 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             elif request.command == Events.CREATE_REDIR.value:  
                 success, _ = self.__comm_handler.cluster_handler.run_protocol(
                     request.id, request.replica_no, Events.CREATE_REDIR, request.key, request.value)
+                
+            self.__statemachine.trigger(Events.DONE)
         
         # Send acknowledgement
-        self.__statemachine.trigger(Events.DONE)
-        return pirestore_pb2.Ack(
+        return pirestore_pb2.WriteAck(
                 success=success, # All replicas are created
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
@@ -81,25 +82,27 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         read_success = False
         read_value = None
 
+        # First time processing
         if request.id not in self.__history:
             self.__history.append(request.id)
 
-            if request.command == Events.READ.value:
-                self.__statemachine.poll(Events.READ)
-                self.__statemachine.trigger(Events.READ)
-                read_success, read_value = self.__database.read(
-                    request.key.decode(request.encoding))
+            # Trigger the state machine
+            self.__statemachine.poll(Events.READ)
+            self.__statemachine.trigger(Events.READ)
+            read_success, read_value = self.__database.read(
+                request.key.decode(request.encoding))
 
-                if read_success: # Found in local
-                    read_value = read_value.encode(ENCODING)
+            if read_success: # Found in local
+                read_value = read_value.encode(ENCODING)
 
-                else: # Can not found in local
-                    read_success, read_value = self.__comm_handler.cluster_handler.run_protocol(
-                        request.id, None, Events.READ, request.key, request.value)
-                
-                self.__statemachine.trigger(Events.DONE)
-                    
-        return pirestore_pb2.Response(
+            else: # Can not found in local
+                read_success, read_value = self.__comm_handler.cluster_handler.run_protocol(
+                    request.id, None, Events.READ, request.key, request.value)
+            
+            self.__statemachine.trigger(Events.DONE)
+        
+        # Send response
+        return pirestore_pb2.ReadAck(
             success=read_success,
             value=read_value,
             encoding=ENCODING,
@@ -107,7 +110,36 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
     
     def Update(self, request, context):
-        return super().Update(request, context)
+        grpc_addr, _ = self.__comm_handler.get_address()
+        replica_no = request.replica_no
+
+        # First time processing
+        if request.id not in self.__history:
+            self.__history.append(request.id)
+
+            # Trigger the state machine
+            self.__statemachine.poll(Events.UPDATE)
+            self.__statemachine.trigger(Events.UPDATE)
+            success = self.__database.update(
+                request.key.decode(request.encoding),
+                request.value.decode(request.encoding))
+            
+            if success: # Updated locally
+                replica_no += 1
+            
+            _, ack_no = self.__comm_handler.cluster_handler.run_protocol(
+                request.id, replica_no, Events.UPDATE, request.key, request.value)
+            
+            if ack_no > replica_no: # Some pairs are updated
+                replica_no = ack_no
+            
+            self.__statemachine.trigger(Events.DONE)
+        
+        # Send response
+        return pirestore_pb2.WriteAck(
+                ack_no=replica_no, # Next replica id to update!
+                source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
+                destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
 
     def __handle_request(self, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
         cluster_handler = self.__comm_handler.cluster_handler
@@ -168,7 +200,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     if request.lower() == b"exit":
                         user_handler.close_connection(connection, addr)
                         break
-
+                    
                     event, key, value = user_handler.parse_request(request)
                     self.__statemachine.poll(event)
 
@@ -181,9 +213,6 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 except PollingTimeoutException: # Try to receive/close
                     user_handler.close_connection(connection, addr)
 
-                except InvalidRequestType:
-                    user_handler.send_ack(connection, addr, "Invalid request type")
-                        
                 except ConnectionLostException:
                     break
 

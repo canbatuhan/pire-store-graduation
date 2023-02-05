@@ -71,9 +71,14 @@ class UserHandler:
     def send_ack(self, connection:socket.socket, addr:Tuple[str,int], ack:bool, value:bytes) -> None:
         try: # Try to send
             ack_msg = None
-            if ack == True and value == None: ack_msg = "Success"
-            elif ack == True and value != None: ack_msg = "Succes, value={}".format(value)
-            elif ack == False: ack_msg = "Failure"
+            if ack == True and value == None:
+                ack_msg = "Success"
+
+            elif ack == True and value != None:
+                ack_msg = "Succes, value={}".format(value)
+                
+            elif ack == False:
+                ack_msg = "Failure"
             
             connection.send(ack_msg.encode(ENCODING))
             self.__logger.info("{}:{} is acknowledged '{}'".format(*addr, ack_msg))

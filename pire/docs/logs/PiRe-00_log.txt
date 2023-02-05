@@ -1,0 +1,17 @@
+[Communication-Handler] 23/02/05 05:44:34.623173 - INFO : Started.
+[Communication-Handler-Cluster-Handler] 23/02/05 05:44:36.664676 - FAIL : gRPC channel with 127.0.0.1:8010 is not available. Node might be unawake
+[Communication-Handler-Cluster-Handler] 23/02/05 05:44:38.696182 - FAIL : gRPC channel with 127.0.0.1:8020 is not available. Node might be unawake
+[Communication-Handler-User-Handler] 23/02/05 05:44:38.696182 - INFO : Listening on 127.0.0.1:8005.
+[Replicated-State-Machine] 23/02/05 05:44:38.697185 - INFO : Started.
+[Replicated-State-Machine] 23/02/05 05:44:38.698184 - SUCCESS : Event 'START' triggered the machine 'S_INIT -IDLE-> START'.
+[Local-Database] 23/02/05 05:44:38.702614 - INFO : Started.
+[Communication-Handler-Cluster-Handler] 23/02/05 05:44:49.084221 - INFO : Greeted with 127.0.0.1:8010.
+[Communication-Handler-Cluster-Handler] 23/02/05 05:45:06.180438 - INFO : Greeted with 127.0.0.1:8020.
+[Replicated-State-Machine] 23/02/05 05:45:55.021275 - INFO : Event check... machine can be triggered by event 'CREATE'.
+[Replicated-State-Machine] 23/02/05 05:45:55.021275 - SUCCESS : Event 'CREATE' triggered the machine 'IDLE -CREATING-> CREATE'.
+[Local-Database] 23/02/05 05:45:55.023275 - SUCCESS : Pair 'x:42' is created in local database.
+[Replicated-State-Machine] 23/02/05 05:45:55.024274 - SUCCESS : Event 'DONE' triggered the machine 'CREATING -IDLE-> DONE'.
+[Replicated-State-Machine] 23/02/05 05:46:29.185651 - INFO : Event check... machine can be triggered by event 'READ'.
+[Replicated-State-Machine] 23/02/05 05:46:29.186652 - SUCCESS : Event 'READ' triggered the machine 'IDLE -READING-> READ'.
+[Local-Database] 23/02/05 05:46:29.186652 - SUCCESS : Key 'x' is found, Value '42' is read.
+[Replicated-State-Machine] 23/02/05 05:46:29.186652 - SUCCESS : Event 'DONE' triggered the machine 'READING -IDLE-> DONE'.

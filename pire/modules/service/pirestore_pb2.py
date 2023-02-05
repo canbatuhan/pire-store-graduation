@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\"W\n\x08Greeting\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\xb5\x01\n\x07Request\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x12\n\nreplica_no\x18\x02 \x01(\x05\x12\x0f\n\x07\x63ommand\x18\x03 \x01(\t\x12\x0b\n\x03key\x18\x04 \x01(\x0c\x12\r\n\x05value\x18\x05 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x06 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x89\x01\n\x08Response\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"c\n\x03\x41\x63k\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32\xd6\x01\n\x11PireKeyValueStore\x12.\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x0e.pirestore.Ack\"\x00\x12.\n\x06\x43reate\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x12\x31\n\x04Read\x12\x12.pirestore.Request\x1a\x13.pirestore.Response\"\x00\x12.\n\x06Update\x12\x12.pirestore.Request\x1a\x0e.pirestore.Ack\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\"W\n\x08Greeting\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\xba\x01\n\x0cWriteRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x12\n\nreplica_no\x18\x02 \x01(\x05\x12\x0f\n\x07\x63ommand\x18\x03 \x01(\t\x12\x0b\n\x03key\x18\x04 \x01(\x0c\x12\r\n\x05value\x18\x05 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x06 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x96\x01\n\x0bReadRequest\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ommand\x18\x03 \x01(\t\x12\x0b\n\x03key\x18\x04 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x06 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"x\n\x08WriteAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0e\n\x06\x61\x63k_no\x18\x02 \x01(\x05\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x88\x01\n\x07ReadAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12\"\n\x06source\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12\'\n\x0b\x64\x65stination\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\x05\x32\xf2\x01\n\x11PireKeyValueStore\x12\x33\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x13.pirestore.WriteAck\"\x00\x12\x38\n\x06\x43reate\x12\x17.pirestore.WriteRequest\x1a\x13.pirestore.WriteAck\"\x00\x12\x34\n\x04Read\x12\x16.pirestore.ReadRequest\x1a\x12.pirestore.ReadAck\"\x00\x12\x38\n\x06Update\x12\x17.pirestore.WriteRequest\x1a\x13.pirestore.WriteAck\"\x00\x62\x06proto3'
 )
 
 
@@ -64,65 +64,65 @@ _GREETING = _descriptor.Descriptor(
 )
 
 
-_REQUEST = _descriptor.Descriptor(
-  name='Request',
-  full_name='pirestore.Request',
+_WRITEREQUEST = _descriptor.Descriptor(
+  name='WriteRequest',
+  full_name='pirestore.WriteRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='pirestore.Request.id', index=0,
+      name='id', full_name='pirestore.WriteRequest.id', index=0,
       number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='replica_no', full_name='pirestore.Request.replica_no', index=1,
+      name='replica_no', full_name='pirestore.WriteRequest.replica_no', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='command', full_name='pirestore.Request.command', index=2,
+      name='command', full_name='pirestore.WriteRequest.command', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='key', full_name='pirestore.Request.key', index=3,
+      name='key', full_name='pirestore.WriteRequest.key', index=3,
       number=4, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='pirestore.Request.value', index=4,
+      name='value', full_name='pirestore.WriteRequest.value', index=4,
       number=5, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='encoding', full_name='pirestore.Request.encoding', index=5,
+      name='encoding', full_name='pirestore.WriteRequest.encoding', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='source', full_name='pirestore.Request.source', index=6,
+      name='source', full_name='pirestore.WriteRequest.source', index=6,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='destination', full_name='pirestore.Request.destination', index=7,
+      name='destination', full_name='pirestore.WriteRequest.destination', index=7,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -141,48 +141,55 @@ _REQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=120,
-  serialized_end=301,
+  serialized_end=306,
 )
 
 
-_RESPONSE = _descriptor.Descriptor(
-  name='Response',
-  full_name='pirestore.Response',
+_READREQUEST = _descriptor.Descriptor(
+  name='ReadRequest',
+  full_name='pirestore.ReadRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='pirestore.Response.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
+      name='id', full_name='pirestore.ReadRequest.id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='value', full_name='pirestore.Response.value', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='encoding', full_name='pirestore.Response.encoding', index=2,
+      name='command', full_name='pirestore.ReadRequest.command', index=1,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='source', full_name='pirestore.Response.source', index=3,
+      name='key', full_name='pirestore.ReadRequest.key', index=2,
+      number=4, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='encoding', full_name='pirestore.ReadRequest.encoding', index=3,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='pirestore.ReadRequest.source', index=4,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='destination', full_name='pirestore.Response.destination', index=4,
+      name='destination', full_name='pirestore.ReadRequest.destination', index=5,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -200,35 +207,42 @@ _RESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=304,
-  serialized_end=441,
+  serialized_start=309,
+  serialized_end=459,
 )
 
 
-_ACK = _descriptor.Descriptor(
-  name='Ack',
-  full_name='pirestore.Ack',
+_WRITEACK = _descriptor.Descriptor(
+  name='WriteAck',
+  full_name='pirestore.WriteAck',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='pirestore.Ack.success', index=0,
+      name='success', full_name='pirestore.WriteAck.success', index=0,
       number=1, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='source', full_name='pirestore.Ack.source', index=1,
+      name='ack_no', full_name='pirestore.WriteAck.ack_no', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='pirestore.WriteAck.source', index=2,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='destination', full_name='pirestore.Ack.destination', index=2,
+      name='destination', full_name='pirestore.WriteAck.destination', index=3,
       number=12, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -246,8 +260,68 @@ _ACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=443,
-  serialized_end=542,
+  serialized_start=461,
+  serialized_end=581,
+)
+
+
+_READACK = _descriptor.Descriptor(
+  name='ReadAck',
+  full_name='pirestore.ReadAck',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='success', full_name='pirestore.ReadAck.success', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='pirestore.ReadAck.value', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='encoding', full_name='pirestore.ReadAck.encoding', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='pirestore.ReadAck.source', index=3,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='destination', full_name='pirestore.ReadAck.destination', index=4,
+      number=12, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=584,
+  serialized_end=720,
 )
 
 
@@ -285,22 +359,25 @@ _ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=544,
-  serialized_end=581,
+  serialized_start=722,
+  serialized_end=759,
 )
 
 _GREETING.fields_by_name['source'].message_type = _ADDRESS
 _GREETING.fields_by_name['destination'].message_type = _ADDRESS
-_REQUEST.fields_by_name['source'].message_type = _ADDRESS
-_REQUEST.fields_by_name['destination'].message_type = _ADDRESS
-_RESPONSE.fields_by_name['source'].message_type = _ADDRESS
-_RESPONSE.fields_by_name['destination'].message_type = _ADDRESS
-_ACK.fields_by_name['source'].message_type = _ADDRESS
-_ACK.fields_by_name['destination'].message_type = _ADDRESS
+_WRITEREQUEST.fields_by_name['source'].message_type = _ADDRESS
+_WRITEREQUEST.fields_by_name['destination'].message_type = _ADDRESS
+_READREQUEST.fields_by_name['source'].message_type = _ADDRESS
+_READREQUEST.fields_by_name['destination'].message_type = _ADDRESS
+_WRITEACK.fields_by_name['source'].message_type = _ADDRESS
+_WRITEACK.fields_by_name['destination'].message_type = _ADDRESS
+_READACK.fields_by_name['source'].message_type = _ADDRESS
+_READACK.fields_by_name['destination'].message_type = _ADDRESS
 DESCRIPTOR.message_types_by_name['Greeting'] = _GREETING
-DESCRIPTOR.message_types_by_name['Request'] = _REQUEST
-DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
-DESCRIPTOR.message_types_by_name['Ack'] = _ACK
+DESCRIPTOR.message_types_by_name['WriteRequest'] = _WRITEREQUEST
+DESCRIPTOR.message_types_by_name['ReadRequest'] = _READREQUEST
+DESCRIPTOR.message_types_by_name['WriteAck'] = _WRITEACK
+DESCRIPTOR.message_types_by_name['ReadAck'] = _READACK
 DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -311,26 +388,33 @@ Greeting = _reflection.GeneratedProtocolMessageType('Greeting', (_message.Messag
   })
 _sym_db.RegisterMessage(Greeting)
 
-Request = _reflection.GeneratedProtocolMessageType('Request', (_message.Message,), {
-  'DESCRIPTOR' : _REQUEST,
+WriteRequest = _reflection.GeneratedProtocolMessageType('WriteRequest', (_message.Message,), {
+  'DESCRIPTOR' : _WRITEREQUEST,
   '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.Request)
+  # @@protoc_insertion_point(class_scope:pirestore.WriteRequest)
   })
-_sym_db.RegisterMessage(Request)
+_sym_db.RegisterMessage(WriteRequest)
 
-Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), {
-  'DESCRIPTOR' : _RESPONSE,
+ReadRequest = _reflection.GeneratedProtocolMessageType('ReadRequest', (_message.Message,), {
+  'DESCRIPTOR' : _READREQUEST,
   '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.Response)
+  # @@protoc_insertion_point(class_scope:pirestore.ReadRequest)
   })
-_sym_db.RegisterMessage(Response)
+_sym_db.RegisterMessage(ReadRequest)
 
-Ack = _reflection.GeneratedProtocolMessageType('Ack', (_message.Message,), {
-  'DESCRIPTOR' : _ACK,
+WriteAck = _reflection.GeneratedProtocolMessageType('WriteAck', (_message.Message,), {
+  'DESCRIPTOR' : _WRITEACK,
   '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.Ack)
+  # @@protoc_insertion_point(class_scope:pirestore.WriteAck)
   })
-_sym_db.RegisterMessage(Ack)
+_sym_db.RegisterMessage(WriteAck)
+
+ReadAck = _reflection.GeneratedProtocolMessageType('ReadAck', (_message.Message,), {
+  'DESCRIPTOR' : _READACK,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.ReadAck)
+  })
+_sym_db.RegisterMessage(ReadAck)
 
 Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,), {
   'DESCRIPTOR' : _ADDRESS,
@@ -348,8 +432,8 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=584,
-  serialized_end=798,
+  serialized_start=762,
+  serialized_end=1004,
   methods=[
   _descriptor.MethodDescriptor(
     name='Greet',
@@ -357,7 +441,7 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_GREETING,
-    output_type=_ACK,
+    output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -366,8 +450,8 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireKeyValueStore.Create',
     index=1,
     containing_service=None,
-    input_type=_REQUEST,
-    output_type=_ACK,
+    input_type=_WRITEREQUEST,
+    output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -376,8 +460,8 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireKeyValueStore.Read',
     index=2,
     containing_service=None,
-    input_type=_REQUEST,
-    output_type=_RESPONSE,
+    input_type=_READREQUEST,
+    output_type=_READACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -386,8 +470,8 @@ _PIREKEYVALUESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireKeyValueStore.Update',
     index=3,
     containing_service=None,
-    input_type=_REQUEST,
-    output_type=_ACK,
+    input_type=_WRITEREQUEST,
+    output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

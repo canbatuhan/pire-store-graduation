@@ -17,22 +17,22 @@ class PireKeyValueStoreStub(object):
         self.Greet = channel.unary_unary(
                 '/pirestore.PireKeyValueStore/Greet',
                 request_serializer=pirestore__pb2.Greeting.SerializeToString,
-                response_deserializer=pirestore__pb2.Ack.FromString,
+                response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
         self.Create = channel.unary_unary(
                 '/pirestore.PireKeyValueStore/Create',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Ack.FromString,
+                request_serializer=pirestore__pb2.WriteRequest.SerializeToString,
+                response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
         self.Read = channel.unary_unary(
                 '/pirestore.PireKeyValueStore/Read',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Response.FromString,
+                request_serializer=pirestore__pb2.ReadRequest.SerializeToString,
+                response_deserializer=pirestore__pb2.ReadAck.FromString,
                 )
         self.Update = channel.unary_unary(
                 '/pirestore.PireKeyValueStore/Update',
-                request_serializer=pirestore__pb2.Request.SerializeToString,
-                response_deserializer=pirestore__pb2.Ack.FromString,
+                request_serializer=pirestore__pb2.WriteRequest.SerializeToString,
+                response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
 
 
@@ -69,22 +69,22 @@ def add_PireKeyValueStoreServicer_to_server(servicer, server):
             'Greet': grpc.unary_unary_rpc_method_handler(
                     servicer.Greet,
                     request_deserializer=pirestore__pb2.Greeting.FromString,
-                    response_serializer=pirestore__pb2.Ack.SerializeToString,
+                    response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
             'Create': grpc.unary_unary_rpc_method_handler(
                     servicer.Create,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Ack.SerializeToString,
+                    request_deserializer=pirestore__pb2.WriteRequest.FromString,
+                    response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
             'Read': grpc.unary_unary_rpc_method_handler(
                     servicer.Read,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Response.SerializeToString,
+                    request_deserializer=pirestore__pb2.ReadRequest.FromString,
+                    response_serializer=pirestore__pb2.ReadAck.SerializeToString,
             ),
             'Update': grpc.unary_unary_rpc_method_handler(
                     servicer.Update,
-                    request_deserializer=pirestore__pb2.Request.FromString,
-                    response_serializer=pirestore__pb2.Ack.SerializeToString,
+                    request_deserializer=pirestore__pb2.WriteRequest.FromString,
+                    response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -109,7 +109,7 @@ class PireKeyValueStore(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Greet',
             pirestore__pb2.Greeting.SerializeToString,
-            pirestore__pb2.Ack.FromString,
+            pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -125,8 +125,8 @@ class PireKeyValueStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Create',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Ack.FromString,
+            pirestore__pb2.WriteRequest.SerializeToString,
+            pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -142,8 +142,8 @@ class PireKeyValueStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Read',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Response.FromString,
+            pirestore__pb2.ReadRequest.SerializeToString,
+            pirestore__pb2.ReadAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -159,7 +159,7 @@ class PireKeyValueStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Update',
-            pirestore__pb2.Request.SerializeToString,
-            pirestore__pb2.Ack.FromString,
+            pirestore__pb2.WriteRequest.SerializeToString,
+            pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

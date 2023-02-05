@@ -1,6 +1,6 @@
 import random
 import grpc
-from typing import Dict, Iterable, List, Tuple
+from typing import Any, Dict, Iterable, List, Tuple
 
 from pire.modules.service import pirestore_pb2
 from pire.modules.service import pirestore_pb2_grpc
@@ -38,7 +38,7 @@ class ClusterHandler:
         try: # Try to send a message
             channel = self.__neighbours.get(dst_addr)
             stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-            response = stub.Create(pirestore_pb2.Request(
+            response = stub.Create(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=event.value, key=key, value=value, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
@@ -54,12 +54,12 @@ class ClusterHandler:
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return False
         
-    def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, event:Events, key:bytes) -> Tuple[bool, bytes]:
+    def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
         try: # Try to send a message
             channel = self.__neighbours.get(dst_addr)
             stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-            response = stub.Read(pirestore_pb2.Request(
-                id=request_id, command=event.value,
+            response = stub.Read(pirestore_pb2.ReadRequest(
+                id=request_id, command=Events.READ.value,
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
@@ -73,6 +73,27 @@ class ClusterHandler:
         except: # Channel is broken
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return False, None
+
+    def __call_update_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes, value:bytes) -> int:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Update(pirestore_pb2.WriteRequest(
+                id=request_id, replica_no=replica_no,
+                command=Events.UPDATE.value,
+                key=key, value=value, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            
+            if response.ack_no > replica_no:
+                self.__logger.info("Pair '{}:{}' is updated in {}:{} ".format(
+                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
+                
+            return response.ack_no
+
+        except Exception as e: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return replica_no
 
     def _create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
         # Send CREATE message to one of the neighbours
@@ -111,14 +132,32 @@ class ClusterHandler:
 
         for dst_addr in self.__neighbours_addr:
             success, read_value = self.__call_read_service(
-                (self.__host, self.__grpc_port), dst_addr,
-                request_id, Events.READ, key)
+                (self.__host, self.__grpc_port), dst_addr, request_id, key)
+
             if success: # Value found
                 break
+
         return success, read_value
     
-    def _update_protocol() -> None:
-        pass
+    def _update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
+        # Send CREATE message to one of the neighbours
+        random.shuffle(self.__neighbours_addr)
+
+        print("starting protocol, currently {} replicas are updated".format(replica_no))
+        for dst_addr in self.__neighbours_addr:
+            print("im in protocol, sending to {}".format(dst_addr[1]))
+            ack_no = self.__call_update_service(
+                (self.__host, self.__grpc_port), dst_addr,
+                request_id, replica_no, key, value)
+
+            if ack_no > replica_no:
+                replica_no = ack_no # Next replica id to update
+
+            if ack_no == N_REPLICAS:
+                break # All replicas are updated
+        
+        print("returning: {}".format(ack_no))
+        return replica_no == N_REPLICAS, ack_no 
 
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
@@ -126,20 +165,21 @@ class ClusterHandler:
         self.__neighbours.update({addr:channel})
         self.__logger.info("Greeted with {}:{}.".format(*addr))
 
-    def run_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
-        success = False
-        read_value = None
-
+    def run_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> Tuple[bool, object]:
         if event == Events.CREATE or event == Events.CREATE_REDIR:
-            success = self._create_protocol(request_id, replica_no, key, value)
+            success = self._create_protocol(
+                request_id, replica_no, key, value)
+            return success, None
 
         elif event == Events.READ:
-            success, read_value = self._read_protocol(request_id, key)
+            success, read_value = self._read_protocol(
+                request_id, key)
+            return success, read_value
 
         elif event == Events.UPDATE:
-            success = self._update_protocol(request_id, key)
-
-        return success, read_value
+            success, ack_no = self._update_protocol(
+                request_id, replica_no, key, value)
+            return success, ack_no
 
     def start(self) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p) 

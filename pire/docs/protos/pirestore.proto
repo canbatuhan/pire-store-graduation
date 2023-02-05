@@ -3,10 +3,10 @@ syntax = "proto3";
 package pirestore;
 
 service PireKeyValueStore {
-    rpc Greet (Greeting) returns (Ack) {}
-    rpc Create (Request) returns (Ack) {}
-    rpc Read (Request) returns (Response) {}
-    rpc Update (Request) returns (Ack) {}
+    rpc Greet (Greeting) returns (WriteAck) {}
+    rpc Create (WriteRequest) returns (WriteAck) {}
+    rpc Read (ReadRequest) returns (ReadAck) {}
+    rpc Update (WriteRequest) returns (WriteAck) {}
 }
 
 message Greeting {
@@ -14,7 +14,7 @@ message Greeting {
     Address destination = 12;
 }
 
-message Request {
+message WriteRequest {
     int32 id = 1;
     int32 replica_no = 2;
     string command = 3;
@@ -25,16 +25,26 @@ message Request {
     Address destination = 12;
 }
 
-message Response {
-    bool success = 1;
-    bytes value = 2;
-    string encoding = 3;
+message ReadRequest {
+    int32 id = 1;
+    string command = 3;
+    bytes key = 4;
+    string encoding = 6;
     Address source = 10;
     Address destination = 12;
 }
 
-message Ack {
+message WriteAck {
     bool success = 1;
+    int32 ack_no = 2;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message ReadAck {
+    bool success = 1;
+    bytes value = 2;
+    string encoding = 3;
     Address source = 10;
     Address destination = 12;
 }
