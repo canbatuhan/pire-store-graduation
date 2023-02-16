@@ -17,6 +17,9 @@ class ClusterHandler:
         self.__neighbours:Dict[Tuple[str,int],grpc.Channel] = dict()
         self.__logger = Logger("Communication-Handler-Cluster-Handler", client_id)
 
+
+    """ GREET Protocol Implementation Starts """
+
     def __send_greetings(self) -> None:
         for addr, channel in self.__neighbours.items():
             try: # Try to send a message
@@ -33,6 +36,17 @@ class ClusterHandler:
             
             except: # Channel is broken
                 self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*addr))
+        
+    def accept_greeting(self, addr:Tuple[str,int]) -> None:
+        addr_as_str = lambda h, p : "{}:{}".format(h, p)
+        channel = grpc.insecure_channel(addr_as_str(*addr))
+        self.__neighbours.update({addr:channel})
+        self.__logger.info("Greeted with {}:{}.".format(*addr))
+
+    """ GREET Protocol Implementation Ends """
+
+
+    """ CREATE Protocol Implementation Starts """
 
     def __call_create_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> bool:
         try: # Try to send a message
@@ -53,68 +67,6 @@ class ClusterHandler:
         except: # Channel is broken
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return False
-        
-    def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
-        try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-            response = stub.Read(pirestore_pb2.ReadRequest(
-                id=request_id, command=Events.READ.value,
-                key=key, encoding=ENCODING,
-                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.success:
-                self.__logger.info("Pair '{}:{}' is read from {}:{} ".format(
-                    key.decode(ENCODING), response.value.decode(ENCODING), *dst_addr))
-                
-            return response.success, response.value
-
-        except: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return False, None
-
-    def __call_update_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes, value:bytes) -> int:
-        try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-            response = stub.Update(pirestore_pb2.WriteRequest(
-                id=request_id, replica_no=replica_no,
-                command=Events.UPDATE.value,
-                key=key, value=value, encoding=ENCODING,
-                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Pair '{}:{}' is updated in {}:{} ".format(
-                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
-                
-            return response.ack_no
-
-        except Exception as e: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return replica_no
-        
-    def __call_delete_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes) -> int:
-        try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-            response = stub.Delete(pirestore_pb2.WriteRequest(
-                id=request_id, replica_no=replica_no,
-                command=Events.DELETE.value,
-                key=key, encoding=ENCODING,
-                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Key '{}' is deleted in {}:{} ".format(
-                    key.decode(ENCODING), *dst_addr))
-                
-            return response.ack_no
-
-        except Exception as e: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return replica_no
 
     def create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
         # Send CREATE message to one of the neighbours
@@ -146,6 +98,31 @@ class ClusterHandler:
         
         return success # All replicas are created
     
+    """ CREATE Protocol Implementation Ends """
+
+
+    """ READ Protocol Implementation Starts """
+    
+    def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Read(pirestore_pb2.ReadRequest(
+                id=request_id, command=Events.READ.value,
+                key=key, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            
+            if response.success:
+                self.__logger.info("Pair '{}:{}' is read from {}:{} ".format(
+                    key.decode(ENCODING), response.value.decode(ENCODING), *dst_addr))
+                
+            return response.success, response.value
+
+        except: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return False, None
+
     def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
         success = False
@@ -160,6 +137,32 @@ class ClusterHandler:
 
         return success, read_value
     
+    """ READ Protocol Implementation Ends """
+
+
+    """ UPDATE Protocol Implementation Starts """
+    
+    def __call_update_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes, value:bytes) -> int:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Update(pirestore_pb2.WriteRequest(
+                id=request_id, replica_no=replica_no,
+                command=Events.UPDATE.value,
+                key=key, value=value, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            
+            if response.ack_no > replica_no:
+                self.__logger.info("Pair '{}:{}' is updated in {}:{} ".format(
+                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
+                
+            return response.ack_no
+
+        except Exception as e: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return replica_no
+
     def update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
@@ -177,6 +180,32 @@ class ClusterHandler:
 
         return replica_no == N_REPLICAS, ack_no 
     
+    """ UPDATE Protocol Implementation Ends """
+
+
+    """ DELETE Protocol Implementation Starts """
+    
+    def __call_delete_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes) -> int:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Delete(pirestore_pb2.WriteRequest(
+                id=request_id, replica_no=replica_no,
+                command=Events.DELETE.value,
+                key=key, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            
+            if response.ack_no > replica_no:
+                self.__logger.info("Key '{}' is deleted in {}:{} ".format(
+                    key.decode(ENCODING), *dst_addr))
+                
+            return response.ack_no
+
+        except Exception as e: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return replica_no
+
     def delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
@@ -193,12 +222,31 @@ class ClusterHandler:
                 break # All replicas are updated
 
         return replica_no == N_REPLICAS, ack_no 
+    
+    """ DELETE Protocol Implementation Ends """
 
-    def accept_greeting(self, addr:Tuple[str,int]) -> None:
-        addr_as_str = lambda h, p : "{}:{}".format(h, p)
-        channel = grpc.insecure_channel(addr_as_str(*addr))
-        self.__neighbours.update({addr:channel})
-        self.__logger.info("Greeted with {}:{}.".format(*addr))
+
+    def run_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> Tuple[bool, object]:
+        if event == Events.CREATE or event == Events.CREATE_REDIR:
+            success = self.create_protocol(
+                request_id, replica_no, key, value)
+            return success, None
+
+        elif event == Events.READ:
+            success, read_value = self.read_protocol(
+                request_id, key)
+            return success, read_value
+
+        elif event == Events.UPDATE:
+            success, ack_no = self.update_protocol(
+                request_id, replica_no, key, value)
+            return success, ack_no
+        
+        elif event == Events.DELETE:
+            success, ack_no = self.delete_protocol(
+                request_id, replica_no, key)
+            return success, ack_no
+
 
     def start(self) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p) 

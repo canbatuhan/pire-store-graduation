@@ -27,7 +27,10 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         self.__statemachine = ReplicatedStateMachine(self.__id, config_paths.get("statemachine"))
         self.__database = LocalDatabase(self.__id)
         self.__history:List[int] = list()
-        
+    
+
+    """ gRPC Service Implementations Start """
+
     def Greet(self, request, context):
         grpc_addr, _ = self.__comm_handler.get_address() 
         dst_addr = (request.destination.host, request.destination.port)
@@ -66,7 +69,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
             # Redirect CREATE message : run protocol
             elif request.command == Events.CREATE_REDIR.value:  
-                success = self.__comm_handler.cluster_handler.create_protocol(
+                success = self.__comm_handler.cluster_handler._create_protocol(
                     request.id, request.replica_no, request.key, request.value)
                 
             self.__statemachine.trigger(Events.DONE)
@@ -96,7 +99,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 read_value = read_value.encode(ENCODING)
 
             else: # Can not found in local
-                read_success, read_value = self.__comm_handler.cluster_handler.read_protocol(
+                read_success, read_value = self.__comm_handler.cluster_handler._read_protocol(
                     request.id, request.key)
             
             self.__statemachine.trigger(Events.DONE)
@@ -127,7 +130,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler.update_protocol(
+            _, ack_no = self.__comm_handler.cluster_handler._update_protocol(
                 request.id, replica_no, request.key, request.value)
             
             if ack_no > replica_no: # Some pairs are updated
@@ -158,7 +161,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler.delete_protocol(
+            _, ack_no = self.__comm_handler.cluster_handler._delete_protocol(
                 request.id, replica_no, request.key)
             
             if ack_no > replica_no: # Some pairs are updated
@@ -171,6 +174,9 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 ack_no=replica_no, # Next replica id to update!
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
+    
+    """ gRPC Service Implementations End """
+
 
     def __handle_request(self, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
         cluster_handler = self.__comm_handler.cluster_handler
@@ -202,7 +208,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         # Run corresponding protocol
         random_id = random.choice(range(0, int(MAX_ID)))
         self.__history.append(random_id)
-
+        
         success, read_value = cluster_handler.run_protocol(
             random_id, replica_no, event, key, value)
         
