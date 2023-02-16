@@ -1,10 +1,10 @@
 import random
 import grpc
-from typing import Any, Dict, Iterable, List, Tuple
+from typing import Dict, List, Tuple
 
 from pire.modules.service import pirestore_pb2
 from pire.modules.service import pirestore_pb2_grpc
-from pire.util.constants import ENCODING, MAX_ID, N_REPLICAS
+from pire.util.constants import ENCODING, N_REPLICAS
 from pire.util.enums import Events
 from pire.util.logger import Logger
 
@@ -94,6 +94,27 @@ class ClusterHandler:
         except Exception as e: # Channel is broken
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return replica_no
+        
+    def __call_delete_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes) -> int:
+        try: # Try to send a message
+            channel = self.__neighbours.get(dst_addr)
+            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            response = stub.Delete(pirestore_pb2.WriteRequest(
+                id=request_id, replica_no=replica_no,
+                command=Events.DELETE.value,
+                key=key, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            
+            if response.ack_no > replica_no:
+                self.__logger.info("Key '{}' is deleted in {}:{} ".format(
+                    key.decode(ENCODING), *dst_addr))
+                
+            return response.ack_no
+
+        except Exception as e: # Channel is broken
+            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+            return replica_no
 
     def _create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
         # Send CREATE message to one of the neighbours
@@ -143,9 +164,7 @@ class ClusterHandler:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
 
-        print("starting protocol, currently {} replicas are updated".format(replica_no))
         for dst_addr in self.__neighbours_addr:
-            print("im in protocol, sending to {}".format(dst_addr[1]))
             ack_no = self.__call_update_service(
                 (self.__host, self.__grpc_port), dst_addr,
                 request_id, replica_no, key, value)
@@ -155,8 +174,24 @@ class ClusterHandler:
 
             if ack_no == N_REPLICAS:
                 break # All replicas are updated
+
+        return replica_no == N_REPLICAS, ack_no 
+    
+    def _delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
+        # Send CREATE message to one of the neighbours
+        random.shuffle(self.__neighbours_addr)
         
-        print("returning: {}".format(ack_no))
+        for dst_addr in self.__neighbours_addr:
+            ack_no = self.__call_delete_service(
+                (self.__host, self.__grpc_port), dst_addr,
+                request_id, replica_no, key)
+
+            if ack_no > replica_no:
+                replica_no = ack_no # Next replica id to update
+
+            if ack_no == N_REPLICAS:
+                break # All replicas are updated
+
         return replica_no == N_REPLICAS, ack_no 
 
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
@@ -179,6 +214,11 @@ class ClusterHandler:
         elif event == Events.UPDATE:
             success, ack_no = self._update_protocol(
                 request_id, replica_no, key, value)
+            return success, ack_no
+        
+        elif event == Events.DELETE:
+            success, ack_no = self._delete_protocol(
+                request_id, replica_no, key)
             return success, ack_no
 
     def start(self) -> None:

@@ -34,6 +34,11 @@ class PireKeyValueStoreStub(object):
                 request_serializer=pirestore__pb2.WriteRequest.SerializeToString,
                 response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
+        self.Delete = channel.unary_unary(
+                '/pirestore.PireKeyValueStore/Delete',
+                request_serializer=pirestore__pb2.WriteRequest.SerializeToString,
+                response_deserializer=pirestore__pb2.WriteAck.FromString,
+                )
 
 
 class PireKeyValueStoreServicer(object):
@@ -63,6 +68,12 @@ class PireKeyValueStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Delete(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_PireKeyValueStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -83,6 +94,11 @@ def add_PireKeyValueStoreServicer_to_server(servicer, server):
             ),
             'Update': grpc.unary_unary_rpc_method_handler(
                     servicer.Update,
+                    request_deserializer=pirestore__pb2.WriteRequest.FromString,
+                    response_serializer=pirestore__pb2.WriteAck.SerializeToString,
+            ),
+            'Delete': grpc.unary_unary_rpc_method_handler(
+                    servicer.Delete,
                     request_deserializer=pirestore__pb2.WriteRequest.FromString,
                     response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
@@ -159,6 +175,23 @@ class PireKeyValueStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Update',
+            pirestore__pb2.WriteRequest.SerializeToString,
+            pirestore__pb2.WriteAck.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Delete(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/pirestore.PireKeyValueStore/Delete',
             pirestore__pb2.WriteRequest.SerializeToString,
             pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,

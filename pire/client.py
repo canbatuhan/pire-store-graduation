@@ -11,9 +11,9 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_ID, N_REPLICAS
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_ID
 from pire.util.enums import Events
-from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
+from pire.util.exceptions import ConnectionLostException, PollingTimeoutException
 
 
 class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
@@ -35,13 +35,13 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
         if grpc_addr == dst_addr:
             self.__comm_handler.cluster_handler.accept_greeting(src_addr)
-            return pirestore_pb2.Ack(
+            return pirestore_pb2.WriteAck(
                 success=True,
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))  
 
         else: # Destination address is different
-            return pirestore_pb2.Ack(
+            return pirestore_pb2.WriteAck(
                 success=False,
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
@@ -129,6 +129,37 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             
             _, ack_no = self.__comm_handler.cluster_handler.run_protocol(
                 request.id, replica_no, Events.UPDATE, request.key, request.value)
+            
+            if ack_no > replica_no: # Some pairs are updated
+                replica_no = ack_no
+            
+            self.__statemachine.trigger(Events.DONE)
+        
+        # Send response
+        return pirestore_pb2.WriteAck(
+                ack_no=replica_no, # Next replica id to update!
+                source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
+                destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
+    
+    def Delete(self, request, context):
+        grpc_addr, _ = self.__comm_handler.get_address()
+        replica_no = request.replica_no
+
+        # First time processing
+        if request.id not in self.__history:
+            self.__history.append(request.id)
+
+            # Trigger the state machine
+            self.__statemachine.poll(Events.DELETE)
+            self.__statemachine.trigger(Events.DELETE)
+            success = self.__database.delete(
+                request.key.decode(request.encoding))
+            
+            if success: # Updated locally
+                replica_no += 1
+            
+            _, ack_no = self.__comm_handler.cluster_handler.run_protocol(
+                request.id, replica_no, Events.DELETE, request.key, request.value)
             
             if ack_no > replica_no: # Some pairs are updated
                 replica_no = ack_no

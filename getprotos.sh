@@ -10,4 +10,4 @@ PYTHON_OUT=./pire/modules/service
 GRPC_PYTHON_OUT=./pire/modules/service
 PROTO_FILE_PATH=./pire/docs/protos/pirestore.proto
 
-$RUNNER $FLAGS $PROGRAM $PROTO_DIR_PATH $PYTHON_OUT $GRPC_PYTHON_OUT $PROTO_FILE_PATH
+$RUNNER $FLAGS $PROGRAM --proto_path=$PROTO_DIR_PATH --python_out=$PYTHON_OUT --grpc_python_out=$GRPC_PYTHON_OUT $PROTO_FILE_PATH
