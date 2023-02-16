@@ -116,7 +116,7 @@ class ClusterHandler:
             self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
             return replica_no
 
-    def _create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
+    def create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
         success = False
@@ -146,7 +146,7 @@ class ClusterHandler:
         
         return success # All replicas are created
     
-    def _read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
+    def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
         success = False
         read_value = None
@@ -160,7 +160,7 @@ class ClusterHandler:
 
         return success, read_value
     
-    def _update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
+    def update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
 
@@ -177,7 +177,7 @@ class ClusterHandler:
 
         return replica_no == N_REPLICAS, ack_no 
     
-    def _delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
+    def delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
         random.shuffle(self.__neighbours_addr)
         
@@ -199,27 +199,6 @@ class ClusterHandler:
         channel = grpc.insecure_channel(addr_as_str(*addr))
         self.__neighbours.update({addr:channel})
         self.__logger.info("Greeted with {}:{}.".format(*addr))
-
-    def run_protocol(self, request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> Tuple[bool, object]:
-        if event == Events.CREATE or event == Events.CREATE_REDIR:
-            success = self._create_protocol(
-                request_id, replica_no, key, value)
-            return success, None
-
-        elif event == Events.READ:
-            success, read_value = self._read_protocol(
-                request_id, key)
-            return success, read_value
-
-        elif event == Events.UPDATE:
-            success, ack_no = self._update_protocol(
-                request_id, replica_no, key, value)
-            return success, ack_no
-        
-        elif event == Events.DELETE:
-            success, ack_no = self._delete_protocol(
-                request_id, replica_no, key)
-            return success, ack_no
 
     def start(self) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p) 

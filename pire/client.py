@@ -66,8 +66,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
             # Redirect CREATE message : run protocol
             elif request.command == Events.CREATE_REDIR.value:  
-                success, _ = self.__comm_handler.cluster_handler.run_protocol(
-                    request.id, request.replica_no, Events.CREATE_REDIR, request.key, request.value)
+                success = self.__comm_handler.cluster_handler.create_protocol(
+                    request.id, request.replica_no, request.key, request.value)
                 
             self.__statemachine.trigger(Events.DONE)
         
@@ -96,8 +96,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 read_value = read_value.encode(ENCODING)
 
             else: # Can not found in local
-                read_success, read_value = self.__comm_handler.cluster_handler.run_protocol(
-                    request.id, None, Events.READ, request.key, request.value)
+                read_success, read_value = self.__comm_handler.cluster_handler.read_protocol(
+                    request.id, request.key)
             
             self.__statemachine.trigger(Events.DONE)
         
@@ -127,8 +127,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler.run_protocol(
-                request.id, replica_no, Events.UPDATE, request.key, request.value)
+            _, ack_no = self.__comm_handler.cluster_handler.update_protocol(
+                request.id, replica_no, request.key, request.value)
             
             if ack_no > replica_no: # Some pairs are updated
                 replica_no = ack_no
@@ -158,8 +158,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler.run_protocol(
-                request.id, replica_no, Events.DELETE, request.key, request.value)
+            _, ack_no = self.__comm_handler.cluster_handler.delete_protocol(
+                request.id, replica_no, request.key)
             
             if ack_no > replica_no: # Some pairs are updated
                 replica_no = ack_no
