@@ -28,14 +28,15 @@ class ClusterHandler:
                     source=pirestore_pb2.Address(host=self.__host, port=self.__grpc_port),
                     destination=pirestore_pb2.Address(host=addr[0], port=addr[1])))
 
-                if response.success:
+                if response.success: # Greeted
                     self.__logger.info("Greeted with {}:{}.".format(*addr))
                 
                 else: # Unable to greet
                     self.__logger.failure("Could not greeted with {}:{}.".format(*addr))
             
-            except: # Channel is broken
-                self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*addr))
+            except Exception as exception: # Channel is broken or ERROR IN CODE!
+                self.__logger.failure("Exception Thrown: {}".format(
+                    exception.with_traceback(None)))
         
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
@@ -58,14 +59,15 @@ class ClusterHandler:
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
             
-            if response.success and event == Events.CREATE:
+            if response.success and event == Events.CREATE: # Log
                 self.__logger.info("Pair '{}:{}' is created in {}:{} ".format(
                     key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
                 
             return response.success
 
-        except: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
+        except Exception as exception: # Channel is broken or ERROR IN CODE!
+            self.__logger.failure("Exception Thrown: {}".format(
+                exception.with_traceback(None)))
             return False
 
     def create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> bool:
@@ -119,9 +121,9 @@ class ClusterHandler:
                 
             return response.success, response.value
 
-        except: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return False, None
+        except Exception as exception: # Channel is broken or ERROR IN CODE!
+            self.__logger.failure("Exception Thrown: {}".format(
+                exception.with_traceback(None)))
 
     def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
@@ -159,9 +161,9 @@ class ClusterHandler:
                 
             return response.ack_no
 
-        except Exception as e: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return replica_no
+        except Exception as exception: # Channel is broken or ERROR IN CODE!
+            self.__logger.failure("Exception Thrown: {}".format(
+                exception.with_traceback(None)))
 
     def update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -202,9 +204,9 @@ class ClusterHandler:
                 
             return response.ack_no
 
-        except Exception as e: # Channel is broken
-            self.__logger.failure("gRPC channel with {}:{} is not available. Node might be unawake".format(*dst_addr))
-            return replica_no
+        except Exception as exception: # Channel is broken or ERROR IN CODE!
+            self.__logger.failure("Exception Thrown: {}".format(
+                exception.with_traceback(None)))
 
     def delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours

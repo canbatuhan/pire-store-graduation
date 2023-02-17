@@ -67,9 +67,9 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     request.key.decode(request.encoding),
                     request.value.decode(request.encoding))
 
-            # Redirect CREATE message : run protocol
+            # Redirect CREATE message, run protocol for CREATE
             elif request.command == Events.CREATE_REDIR.value:  
-                success = self.__comm_handler.cluster_handler._create_protocol(
+                success = self.__comm_handler.cluster_handler.create_protocol(
                     request.id, request.replica_no, request.key, request.value)
                 
             self.__statemachine.trigger(Events.DONE)
@@ -98,8 +98,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if read_success: # Found in local
                 read_value = read_value.encode(ENCODING)
 
-            else: # Can not found in local
-                read_success, read_value = self.__comm_handler.cluster_handler._read_protocol(
+            else: # Can not found in local, run protocol for READ
+                read_success, read_value = self.__comm_handler.cluster_handler.read_protocol(
                     request.id, request.key)
             
             self.__statemachine.trigger(Events.DONE)
@@ -130,7 +130,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler._update_protocol(
+            # Run protocol for UPDATE
+            _, ack_no = self.__comm_handler.cluster_handler.update_protocol(
                 request.id, replica_no, request.key, request.value)
             
             if ack_no > replica_no: # Some pairs are updated
@@ -161,7 +162,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             if success: # Updated locally
                 replica_no += 1
             
-            _, ack_no = self.__comm_handler.cluster_handler._delete_protocol(
+            # Run protocol for DELETE
+            _, ack_no = self.__comm_handler.cluster_handler.delete_protocol(
                 request.id, replica_no, request.key)
             
             if ack_no > replica_no: # Some pairs are updated
@@ -229,21 +231,24 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
     def __user_thread(self) -> None:
         user_handler = self.__comm_handler.user_request_handler
 
-        while True:
+        while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
-            while True: # Until someone exits
+            while True: # Until user stays connected
                 try: # Handle user requests
                     request = user_handler.receive_request(connection, addr)
-                    if request.lower() == b"exit":
+                    if request.lower() == b"exit": # User leaves
                         user_handler.close_connection(connection, addr)
                         break
                     
+                    # Parse requests: create(...), read(...), update(...), delete(...)
                     event, key, value = user_handler.parse_request(request)
                     self.__statemachine.poll(event)
 
+                    # Trigger transitions
                     self.__statemachine.trigger(event)
                     ack, read_value = self.__handle_request(event, key, value)
 
+                    # Send acknowledgement to user
                     user_handler.send_ack(connection, addr, ack, read_value)
                     self.__statemachine.trigger(Events.DONE)
 

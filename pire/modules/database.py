@@ -16,7 +16,6 @@ class LocalDatabase:
         if self.__db.exists(key):
             old_value = self.__db.get(key)
             self.__db.set(key, value)
-            self.__logger.warning("Key '{}' already exists in local database '{}:{}'.".format(key, key, old_value))
             self.__logger.warning("Pair '{}:{}' is updated as '{}:{}'".format(key, old_value, key, value))
             
         else: # Key does not exist
@@ -28,7 +27,7 @@ class LocalDatabase:
     def read(self, key:object) -> Tuple[bool,object]:
         if self.__db.exists(key):
             value = self.__db.get(key)
-            self.__logger.success("Key '{}' is found, Value '{}' is read.".format(key, value))
+            self.__logger.success("Key '{}' is found, value '{}' is read.".format(key, value))
             return True, value
 
         else: # Key does not exist
