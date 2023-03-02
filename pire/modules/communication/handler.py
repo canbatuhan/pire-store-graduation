@@ -25,7 +25,7 @@ class CommunicationHandler:
         self.__config_path = config_path
         self.__host, self.__port = str(), int() 
         self.cluster_handler = ClusterHandler(self.__client_id, self.__host, self.__port, self.__get_neighbour_addrs())
-        self.user_request_handler = UserHandler(self.__client_id, self.__host, self.__port+5)
+        self.user_request_handler = UserHandler(self.__client_id, self.__host, self.__port+1000)
         self.__logger = Logger("Communication-Handler", self.__client_id)
 
     def get_address(self) -> Tuple[Tuple[str,int],Tuple[str,int]]:
