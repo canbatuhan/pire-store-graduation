@@ -9,11 +9,11 @@ from pire.util.logger import Logger
 
 
 class UserHandler:
-    def __init__(self, client_id:str, host:str, ui_port:int) -> None:
+    def __init__(self, host:str, ui_port:int) -> None:
         self.__host = host
         self.__ui_port = ui_port
         self.__ui_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__logger = Logger("Communication-Handler-User-Handler", client_id)
+        self.__logger = Logger("Communication-Handler-User-Handler")
 
     def start(self) -> None:
         self.__ui_socket.bind((self.__host, self.__ui_port))

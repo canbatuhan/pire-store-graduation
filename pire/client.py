@@ -24,8 +24,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         self.__id = client_id
         self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
-        self.__statemachine = ReplicatedStateMachine(self.__id, config_paths.get("statemachine"))
-        self.__database = LocalDatabase(self.__id)
+        self.__statemachine = ReplicatedStateMachine(config_paths.get("statemachine"))
+        self.__database = LocalDatabase()
         self.__history:List[int] = list()
     
 

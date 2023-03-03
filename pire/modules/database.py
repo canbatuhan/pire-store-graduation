@@ -5,9 +5,9 @@ from pire.util.constants import LOCAL_DB_PATH
 from pire.util.logger import Logger
 
 class LocalDatabase:
-    def __init__(self, client_id:str) -> None:
-        self.__db = pickledb.load(LOCAL_DB_PATH(client_id), True)
-        self.__logger = Logger("Local-Database", client_id)
+    def __init__(self) -> None:
+        self.__db = pickledb.load(LOCAL_DB_PATH, True)
+        self.__logger = Logger("Local-Database")
 
     def start(self) -> None:
         self.__logger.info("Started.")
