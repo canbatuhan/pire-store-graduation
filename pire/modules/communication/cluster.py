@@ -10,12 +10,12 @@ from pire.util.logger import Logger
 
 
 class ClusterHandler:
-    def __init__(self, client_id:str, host:str, grpc_port:int, neighbours_addr:List[Tuple[str,int]]) -> None:
+    def __init__(self, host:str, grpc_port:int, neighbours_addr:List[Tuple[str,int]]) -> None:
         self.__host = host
         self.__grpc_port = grpc_port
         self.__neighbours_addr = neighbours_addr
         self.__neighbours:Dict[Tuple[str,int],grpc.Channel] = dict()
-        self.__logger = Logger("Communication-Handler-Cluster-Handler", client_id)
+        self.__logger = Logger("Communication-Handler-Cluster-Handler")
 
 
     """ GREET Protocol Implementation Starts """

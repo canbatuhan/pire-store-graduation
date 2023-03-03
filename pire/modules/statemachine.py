@@ -8,9 +8,9 @@ from pire.util.exceptions import PollingTimeoutException
 
 
 class ReplicatedStateMachine:
-    def __init__(self, client_str:str, config_path:str) -> None:
+    def __init__(self, config_path:str) -> None:
         self.__machine = FiniteStateMachine(config_path)
-        self.__logger = Logger("Replicated-State-Machine", client_str)
+        self.__logger = Logger("Replicated-State-Machine")
 
     def start(self) -> None:
         self.__logger.info("Started.")
