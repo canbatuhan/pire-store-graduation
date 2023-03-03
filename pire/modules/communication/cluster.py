@@ -255,4 +255,5 @@ class ClusterHandler:
         for addr in self.__neighbours_addr:
             channel = grpc.insecure_channel(addr_as_str(*addr))
             self.__neighbours.update({addr:channel})
+        self.__logger.info("Listening on {}:{}.".format(self.__host, self.__grpc_port))
         self.__send_greetings()
