@@ -224,7 +224,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
     def __grpc_thread(self) -> None:
         grpc_addr, _ = self.__comm_handler.get_address()
         pirestore_pb2_grpc.add_PireKeyValueStoreServicer_to_server(self, self.__store_service)
-        self.__store_service.add_insecure_port("{}:{}".format(*grpc_addr))
+        self.__store_service.add_insecure_port("0.0.0.0:{}".format(grpc_addr[1]))
         self.__store_service.start()
         self.__store_service.wait_for_termination()
 
