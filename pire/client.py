@@ -22,7 +22,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         file = open(CLIENT_CONFIG_PATH, 'r')
         config_paths = dict(json.load(file))
         self.__id = client_id
-        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
         self.__statemachine = ReplicatedStateMachine(config_paths.get("statemachine"))
         self.__database = LocalDatabase()
