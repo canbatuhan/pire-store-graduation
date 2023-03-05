@@ -254,12 +254,14 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 
                 except PollingTimeoutException: # Try to receive/close
                     user_handler.close_connection(connection, addr)
+                    break
 
                 except ConnectionLostException:
                     break
 
                 except InvalidRequestType: # Try to receive/close
                     user_handler.close_connection(connection, addr)
+                    break
 
     def run(self):
         Thread(target=self.__grpc_thread).start()
