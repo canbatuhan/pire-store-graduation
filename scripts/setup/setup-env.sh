@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./install-python.sh
-./install-modules.sh
-./get-codes.sh
-./set-files.sh
+./install-python.sh -a
+./install-modules.sh -a
+./clone-pire.sh -a
+./set-files.sh -a

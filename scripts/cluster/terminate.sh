@@ -5,20 +5,15 @@ NEWLINE="echo """
 PASSWORD="tolga.halit.batu"
 USERNAME="pi_user"
 TEMPLATE="192.168.1.12"
-LOG_FILENAME="log.txt"
-DB_FILENAME="local.db"
+PORT=9000
 
 # Commands
-CD="cd /home/batuhan/pire-store/pire/docs"
-CREATE_LOG="sudo touch $LOG_FILENAME"
-CREATE_DB="sudo touch $DB_FILENAME"
-PERMISSION="sudo chmod 777 *.*"
-CLEAR_LOG="echo > $LOG_FILENAME"
-CLEAR_DB="echo {} > $DB_FILENAME"
+KILL="pkill -9 python"
+CLOSE="fuser -k -n tcp $PORT"
 EXIT="exit"
 
 # Script to execute
-SCRIPT="$CD;$CREATE_LOG;$CREATE_DB;$PERMISSION;$CLEAR_LOG;$CLEAR_DB;$EXIT"
+SCRIPT="$KILL;$CLOSE;$EXIT"
 
 # Parse arguments
 while getopts :as:f: flag ; do
@@ -29,7 +24,7 @@ while getopts :as:f: flag ; do
     esac
 done
 
-# Clear 'log.txt' and 'local.db'
+# Terminate pire-store clients
 while [ $START -le $FINISH ] ; do
     NODE_NAME="PiRe-0$START"
     HOSTNAME=$TEMPLATE$START
@@ -40,6 +35,6 @@ while [ $START -le $FINISH ] ; do
 	echo "---------------------------------"
 	
     sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT
-    echo "[Seagull Server Machine] > '$LOG_FILENAME' and '$DB_FILENAME' are reset."
+    echo "[Seagull Server Machine] > All 'python' processes are killed."
     START=$(($START+1))
 done

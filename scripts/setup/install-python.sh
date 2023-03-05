@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Commands
 NEWLINE="echo """
 PASSWORD="tolga.halit.batu"
 USERNAME="pi_user"
@@ -27,12 +28,22 @@ CHECK="python --version"
 EXIT="exit"
 SETUP_PHASE="$CD2BIN;$REMOVE;$SET;$PIP;$CHECK;$EXIT"
 
-#SCRIPT="$DOWNLOAD_PHASE;$INSTALL_PHASE;$SETUP_PHASE"
-SCRIPT="$INSTALL_SSL;$CD2PYTHON;$ENABLE;$MAKE;$INSTALL;$EXIT"
+# Script to execute
+SCRIPT="$DOWNLOAD_PHASE;$INSTALL_PHASE;$SETUP_PHASE"
 
-for INDICATOR in {0..4} ; do
-    NODE_NAME="PiRe-0$INDICATOR"
-    HOSTNAME=$TEMPLATE$INDICATOR
+# Parse arguments
+while getopts :as:f: flag ; do
+    case "${flag}" in
+        a) START=0; FINISH=9;;
+        s) START=${OPTARG};;
+        f) FINISH=${OPTARG};;
+    esac
+done
+
+# Install Python 3.8.10
+while [ $START -le $FINISH ] ; do
+    NODE_NAME="PiRe-0$START"
+    HOSTNAME=$TEMPLATE$START
 
 	$NEWLINE
 	echo "---------------------------------"
@@ -41,4 +52,5 @@ for INDICATOR in {0..4} ; do
 	
     sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT
     echo "[Seagull Server Machine] > Python 3.8.10 installed."
+    START=$(($START+1))
 done

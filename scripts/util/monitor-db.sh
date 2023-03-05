@@ -1,18 +1,31 @@
 #!/bin/bash
 
+# Constants
 NEWLINE="echo """
 USERNAME="pi_user"
 TEMPLATE="192.168.1.12"
 PASSWORD="tolga.halit.batu"
 
+# Commands
 CD="cd /home/batuhan/pire-store/pire/docs"
-DISPLAY="sudo cat log.txt"
+DISPLAY="sudo cat local.db"
 EXIT="exit"
+
+# Script to execute
 SCRIPT="$CD;$DISPLAY;$EXIT"
 
-for INDICATOR in {0..4} ; do
-	NODE_NAME="PiRe-0$INDICATOR"
-    HOSTNAME=$TEMPLATE$INDICATOR
+# Parse arguments
+while getopts :an: flag ; do
+    case "${flag}" in
+        a) START=0; FINISH=9;;
+        n) START=${OPTARG}; FINISH=$START;;
+    esac
+done
+
+# Dispaly logs
+while [ $START -le $FINISH ] ; do
+    NODE_NAME="PiRe-0$START"
+    HOSTNAME=$TEMPLATE$START
 
 	$NEWLINE
 	echo "---------------------------------"
@@ -20,4 +33,6 @@ for INDICATOR in {0..4} ; do
 	echo "---------------------------------"
 	
     sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT
+    START=$(($START+1))
 done
+

@@ -10,15 +10,12 @@ DB_FILENAME="local.db"
 
 # Commands
 CD="cd /home/batuhan/pire-store/pire/docs"
-CREATE_LOG="sudo touch $LOG_FILENAME"
-CREATE_DB="sudo touch $DB_FILENAME"
-PERMISSION="sudo chmod 777 *.*"
-CLEAR_LOG="echo > $LOG_FILENAME"
-CLEAR_DB="echo {} > $DB_FILENAME"
+DELETE_LOG="sudo rm $LOG_FILENAME"
+DELETE_DB="sudo rm $DB_FILENAME"
 EXIT="exit"
 
 # Script to execute
-SCRIPT="$CD;$CREATE_LOG;$CREATE_DB;$PERMISSION;$CLEAR_LOG;$CLEAR_DB;$EXIT"
+SCRIPT="$CD;$DELETE_LOG;$DELETE_DB;$EXIT"
 
 # Parse arguments
 while getopts :as:f: flag ; do
@@ -40,6 +37,6 @@ while [ $START -le $FINISH ] ; do
 	echo "---------------------------------"
 	
     sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT
-    echo "[Seagull Server Machine] > '$LOG_FILENAME' and '$DB_FILENAME' are reset."
+    echo "[Seagull Server Machine] > '$LOG_FILENAME' and '$DB_FILENAME' are removed."
     START=$(($START+1))
 done

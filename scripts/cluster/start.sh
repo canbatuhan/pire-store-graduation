@@ -2,39 +2,37 @@
 
 # Constants
 NEWLINE="echo """
-PASSWORD="tolga.halit.batu"
 USERNAME="pi_user"
 TEMPLATE="192.168.1.12"
+PASSWORD="tolga.halit.batu"
 
 # Commands
-DOWNLOAD="sudo apt-get install python3-pip"
-UPDATE="sudo python3.8 -m pip install --upgrade pip"
-INSTALL="sudo python3.8 -m pip install grpcio protobuf==3.14.0 pickledb smpai"
+CD="cd /home/batuhan/pire-store"
+SLEEP="sleep 1"
 EXIT="exit"
-
-# Script to execute
-SCRIPT="$UPDATE;$INSTALL;$EXIT"
 
 # Parse arguments
 while getopts :as:f: flag ; do
     case "${flag}" in
-        a) START=0; FINISH=9; SCRIPT="$DOWNLOAD;$UPDATE;$INSTALL;$EXIT";
+        a) START=0; FINISH=9;;
         s) START=${OPTARG};;
         f) FINISH=${OPTARG};;
     esac
 done
 
-# Install required modules
+# Start pire-store clients
 while [ $START -le $FINISH ] ; do
     NODE_NAME="PiRe-0$START"
     HOSTNAME=$TEMPLATE$START
+    START_CLUSTER="python main.py --id=$NODE_NAME"
+    SCRIPT="$CD;$START_CLUSTER"
 
 	$NEWLINE
 	echo "---------------------------------"
 	echo "SSH Connection with $NODE_NAME"
 	echo "---------------------------------"
-	
-    sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT
-    echo "[Seagull Server Machine] > Modules are installed/updated."
+
+	sshpass -p $PASSWORD ssh $USERNAME@$HOSTNAME $SCRIPT &
+    sleep 2
     START=$(($START+1))
 done
