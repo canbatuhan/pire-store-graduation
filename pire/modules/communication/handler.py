@@ -8,7 +8,7 @@ from pire.util.logger import Logger
 
 class CommunicationHandler:
     def __get_neighbour_addrs(self) -> List[Tuple[str,int]]:
-        neighbours_addr:List[Tuple[str,int]] = list()
+        neighbour_addrs:List[Tuple[str,int]] = list()
         topology_config:List[dict] = json.load(open(self.__config_path, 'r'))
         for node_config in topology_config:
             if node_config.get("id") == self.__client_id:
@@ -16,15 +16,16 @@ class CommunicationHandler:
                 neighbour_nodes:List[dict] = node_config.get("connections")
                 for neighbour in neighbour_nodes:
                     addr = (neighbour.get("host"), neighbour.get("port"))
-                    neighbours_addr.append(addr)
+                    neighbour_addrs.append(addr)
                 break
-        return neighbours_addr
+        return neighbour_addrs
 
     def __init__(self, client_id:str, config_path:str) -> None:
         self.__client_id = client_id
         self.__config_path = config_path
-        self.__host, self.__port = str(), int() 
-        self.cluster_handler = ClusterHandler(self.__host, self.__port, self.__get_neighbour_addrs())
+        self.__host, self.__port = str(), int()
+        neighbour_addrs = self.__get_neighbour_addrs()
+        self.cluster_handler = ClusterHandler(self.__host, self.__port, neighbour_addrs)
         self.user_request_handler = UserHandler(self.__host, self.__port+1000)
         self.__logger = Logger("Communication-Handler")
 
