@@ -258,8 +258,8 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 except ConnectionLostException:
                     break
 
-                except InvalidRequestType:
-                    break
+                except InvalidRequestType: # Try to receive/close
+                    user_handler.close_connection(connection, addr)
 
     def run(self):
         Thread(target=self.__grpc_thread).start()
