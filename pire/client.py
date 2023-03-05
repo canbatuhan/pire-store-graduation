@@ -13,7 +13,7 @@ from pire.modules.database import LocalDatabase
 
 from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_ID
 from pire.util.enums import Events
-from pire.util.exceptions import ConnectionLostException, PollingTimeoutException
+from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
 
 class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
@@ -251,11 +251,14 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     # Send acknowledgement to user
                     user_handler.send_ack(connection, addr, ack, read_value)
                     self.__statemachine.trigger(Events.DONE)
-
+                
                 except PollingTimeoutException: # Try to receive/close
                     user_handler.close_connection(connection, addr)
 
                 except ConnectionLostException:
+                    break
+
+                except InvalidRequestType:
                     break
 
     def run(self):
