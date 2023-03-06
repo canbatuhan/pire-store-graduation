@@ -22,11 +22,25 @@ SEED=$RANDOM%${#SERVERS[@]}
 RANDOM_SERVER=${SERVERS[$SEED]}
 HOST="$TEMPLATE$RANDOM_SERVER"
 PORT=9000
+MESSAGE="exit"
 
-# Generate request
-if [ -n "$VALUE" ] ; then MESSAGE="$COMMAND($KEY,$VALUE)"
-else MESSAGE="$COMMAND($KEY)"
+# create(x,42) or update(x,42)
+if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "update" ] ; then
+    if [ -n "$VALUE" ] ; then
+        MESSAGE="$COMMAND($KEY,$VALUE)"
+    fi
 fi
 
-echo "Sending message to $HOST:$PORT"
+# read(x) or delete(x)
+if [ "$COMMAND" = "read" ] || [ "$COMMAND" = "delete" ] ; then
+    if [ -z "$VALUE" ] ; then
+        MESSAGE="$COMMAND($KEY)"
+    fi
+fi
+
+# Send message
+echo "Sending $MESSAGE to $HOST:$PORT"
 echo -n $MESSAGE | netcat $HOST $PORT
+
+
+
