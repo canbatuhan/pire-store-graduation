@@ -233,35 +233,33 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
-            while True: # Until user stays connected
-                try: # Handle user requests
-                    request = user_handler.receive_request(connection, addr)
-                    if request.lower() == b"exit": # User leaves
-                        user_handler.close_connection(connection, addr)
-                        break
-                    
-                    # Parse requests: create(...), read(...), update(...), delete(...)
-                    event, key, value = user_handler.parse_request(request)
-                    self.__statemachine.poll(event)
-
-                    # Trigger transitions
-                    self.__statemachine.trigger(event)
-                    ack, read_value = self.__handle_request(event, key, value)
-
-                    # Send acknowledgement to user
-                    user_handler.send_ack(connection, addr, ack, read_value)
-                    self.__statemachine.trigger(Events.DONE)
+            try: # Handle user requests
+                request = user_handler.receive_request(connection, addr)
+                if request.lower() == b"exit": # User leaves
+                    user_handler.close_connection(connection, addr)
+                    break
                 
-                except PollingTimeoutException: # Try to receive/close
-                    user_handler.close_connection(connection, addr)
-                    break
+                # Parse requests: create(...), read(...), update(...), delete(...)
+                event, key, value = user_handler.parse_request(request)
+                self.__statemachine.poll(event)
 
-                except ConnectionLostException:
-                    break
+                # Trigger transitions
+                self.__statemachine.trigger(event)
+                ack, read_value = self.__handle_request(event, key, value)
 
-                except InvalidRequestType: # Try to receive/close
-                    user_handler.close_connection(connection, addr)
-                    break
+                # Send acknowledgement to user
+                user_handler.send_ack(connection, addr, ack, read_value)
+                user_handler.close_connection(connection, addr)
+                self.__statemachine.trigger(Events.DONE)
+            
+            except PollingTimeoutException: # Try to receive/close
+                user_handler.close_connection(connection, addr)
+
+            except ConnectionLostException:
+                pass
+
+            except InvalidRequestType: # Try to receive/close
+                user_handler.close_connection(connection, addr)
 
     def run(self):
         Thread(target=self.__grpc_thread).start()
