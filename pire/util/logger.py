@@ -12,21 +12,25 @@ class Logger:
         return datetime.now().strftime("%y/%m/%d %H:%M:%S.%f")
 
     def info(self, msg:str) -> None:
-        file = open(self.__file_path, 'a')
+        """file = open(self.__file_path, 'a')
         file.write("[{}] {} - INFO : {}\n".format(self.__component, self.__timestamp(), msg))
-        file.close()
+        file.close()"""
+        pass
 
     def success(self, msg:str) -> None:
-        file = open(self.__file_path, 'a')
+        """file = open(self.__file_path, 'a')
         file.write("[{}] {} - SUCCESS : {}\n".format(self.__component, self.__timestamp(), msg))
-        file.close()
+        file.close()"""
+        pass
 
     def warning(self, msg:str) -> None:
-        file = open(self.__file_path, 'a')
+        """file = open(self.__file_path, 'a')
         file.write("[{}] {} - WARNING : {}\n".format(self.__component, self.__timestamp(), msg))
-        file.close()
+        file.close()"""
+        pass
 
     def failure(self, msg:str) -> None:
-        file = open(self.__file_path, 'a')
+        """file = open(self.__file_path, 'a')
         file.write("[{}] {} - FAIL : {}\n".format(self.__component, self.__timestamp(), msg))
-        file.close()
+        file.close()"""
+        pass

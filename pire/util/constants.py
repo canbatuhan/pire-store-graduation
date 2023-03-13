@@ -9,7 +9,7 @@ N_REPLICAS = 3
 
 # State Machine Constants
 INITIAL_POLL_TIME = 5.2e-9 # 52 nanoseconds
-MAX_POLL_TIME = 0.1 # 100 milliseconds
+MAX_POLL_TIME = 0.05 # 50 milliseconds
 
 # User Interface Constants
 BUFFER_SIZE = 256
