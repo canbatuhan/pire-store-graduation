@@ -72,13 +72,13 @@ class UserHandler:
         try: # Try to send
             ack_msg = None
             if ack == True and value == None:
-                ack_msg = "Success\r"
+                ack_msg = "Success\n"
 
             elif ack == True and value != None:
-                ack_msg = "Succes, value={}\r".format(value)
+                ack_msg = "Succes, value={}\n".format(value)
                 
             elif ack == False:
-                ack_msg = "Failure\r"
+                ack_msg = "Failure\n"
             
             connection.send(ack_msg.encode(ENCODING))
             self.__logger.info("{}:{} is acknowledged '{}'".format(*addr, ack_msg))
