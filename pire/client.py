@@ -51,7 +51,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def Create(self, request, context):
         grpc_addr, _ = self.__comm_handler.get_address()
-        success = False
+        replica_no = request.replica_no
 
         try:
             # First time processing
@@ -67,12 +67,18 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     success = self.__database.create(
                         request.key.decode(request.encoding),
                         request.value.decode(request.encoding))
+                    
+                    if success: # Created locally
+                        replica_no += 1 # Increment replica nubmer
 
                 # Redirect CREATE message, run protocol for CREATE
                 elif request.command == Events.CREATE_REDIR.value:  
-                    success = self.__comm_handler.cluster_handler.create_protocol(
+                    _, ack_no = self.__comm_handler.cluster_handler.create_protocol(
                         request.id, request.replica_no, request.key, request.value)
                     
+                    if ack_no > replica_no: # Some pairs are created
+                        replica_no = ack_no
+
                 self.__statemachine.trigger(Events.DONE)
         
         except PollingTimeoutException:
@@ -80,7 +86,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         
         # Send acknowledgement
         return pirestore_pb2.WriteAck(
-                success=success, # All replicas are created
+                ack_no=replica_no, # Next replica id to create
                 source=pirestore_pb2.Address(host=grpc_addr[0], port=grpc_addr[1]),
                 destination=pirestore_pb2.Address(host=request.source.host, port=request.source.port))
 
@@ -172,14 +178,14 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 success = self.__database.delete(
                     request.key.decode(request.encoding))
                 
-                if success: # Updated locally
+                if success: # Deleted locally
                     replica_no += 1
                 
                 # Run protocol for DELETE
                 _, ack_no = self.__comm_handler.cluster_handler.delete_protocol(
                     request.id, replica_no, request.key)
                 
-                if ack_no > replica_no: # Some pairs are updated
+                if ack_no > replica_no: # Some pairs are Deleted
                     replica_no = ack_no
                 
                 self.__statemachine.trigger(Events.DONE)
