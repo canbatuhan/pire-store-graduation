@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 import grpc
 import json
 import random
@@ -24,9 +24,16 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         self.__id = client_id
         self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
-        self.__statemachine = ReplicatedStateMachine(config_paths.get("statemachine"))
+        self.__pair_machine_map:Dict[bytes,ReplicatedStateMachine] = dict()
+        self.__statemachine_config = config_paths.get("statemachine")
         self.__database = LocalDatabase()
         self.__history:List[int] = list()
+
+    def __create_statemachine_if_not_exists(self, key:bytes) -> None:
+        if self.__pair_machine_map.get(key) == None:
+            statemachine = ReplicatedStateMachine(self.__statemachine_config)
+            statemachine.start()
+            self.__pair_machine_map.update({key: statemachine})
     
 
     """ gRPC Service Implementations Start """
@@ -59,8 +66,9 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 self.__history.append(request.id)
 
                 # Trigger the state machine
-                self.__statemachine.poll(Events.CREATE)
-                self.__statemachine.trigger(Events.CREATE)
+                self.__create_statemachine_if_not_exists(request.key)
+                self.__pair_machine_map.get(request.key).poll(Events.CREATE)
+                self.__pair_machine_map.get(request.key).trigger(Events.CREATE)
 
                 # Try to create in local
                 if request.command == Events.CREATE.value:           
@@ -79,7 +87,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     if ack_no > replica_no: # Some pairs are created
                         replica_no = ack_no
 
-                self.__statemachine.trigger(Events.DONE)
+                self.__pair_machine_map.get(request.key).trigger(Events.DONE)
         
         except PollingTimeoutException:
             pass
@@ -101,8 +109,11 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 self.__history.append(request.id)
 
                 # Trigger the state machine
-                self.__statemachine.poll(Events.READ)
-                self.__statemachine.trigger(Events.READ)
+                self.__create_statemachine_if_not_exists(request.key)
+                self.__pair_machine_map.get(request.key).poll(Events.READ)
+                self.__pair_machine_map.get(request.key).trigger(Events.READ)
+
+                # Execute
                 read_success, read_value = self.__database.read(
                     request.key.decode(request.encoding))
 
@@ -113,7 +124,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                     read_success, read_value = self.__comm_handler.cluster_handler.read_protocol(
                         request.id, request.key)
                 
-                self.__statemachine.trigger(Events.DONE)
+                self.__pair_machine_map.get(request.key).trigger(Events.DONE)
 
         except PollingTimeoutException:
             pass
@@ -136,8 +147,11 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 self.__history.append(request.id)
 
                 # Trigger the state machine
-                self.__statemachine.poll(Events.UPDATE)
-                self.__statemachine.trigger(Events.UPDATE)
+                self.__create_statemachine_if_not_exists(request.key)
+                self.__pair_machine_map.get(request.key).poll(Events.UPDATE)
+                self.__pair_machine_map.get(request.key).trigger(Events.UPDATE)
+
+                # Execute
                 success = self.__database.update(
                     request.key.decode(request.encoding),
                     request.value.decode(request.encoding))
@@ -152,7 +166,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 if ack_no > replica_no: # Some pairs are updated
                     replica_no = ack_no
                 
-                self.__statemachine.trigger(Events.DONE)
+                self.__pair_machine_map.get(request.key).trigger(Events.DONE)
         
         except PollingTimeoutException:
             pass
@@ -173,8 +187,10 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 self.__history.append(request.id)
 
                 # Trigger the state machine
-                self.__statemachine.poll(Events.DELETE)
-                self.__statemachine.trigger(Events.DELETE)
+                self.__create_statemachine_if_not_exists(request.key)
+                self.__pair_machine_map.get(request.key).poll(Events.DELETE)
+                self.__pair_machine_map.get(request.key).trigger(Events.DELETE)
+
                 success = self.__database.delete(
                     request.key.decode(request.encoding))
                 
@@ -188,7 +204,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
                 if ack_no > replica_no: # Some pairs are Deleted
                     replica_no = ack_no
                 
-                self.__statemachine.trigger(Events.DONE)
+                self.__pair_machine_map.get(request.key).trigger(Events.DONE)
 
         except PollingTimeoutException:
             pass
@@ -260,16 +276,17 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
                 # Parse requests: create(...), read(...), update(...), delete(...)
                 event, key, value = user_handler.parse_request(request)
-                self.__statemachine.poll(event)
+                self.__create_statemachine_if_not_exists(key)
+                self.__pair_machine_map.get(key).poll(event)
 
                 # Trigger transitions
-                self.__statemachine.trigger(event)
+                self.__pair_machine_map.get(key).trigger(event)
                 ack, read_value = self.__handle_request(event, key, value)
 
                 # Send acknowledgement to user
                 user_handler.send_ack(connection, addr, ack, read_value)
                 user_handler.close_connection(connection, addr)
-                self.__statemachine.trigger(Events.DONE)
+                self.__pair_machine_map.get(key).trigger(Events.DONE)
             
             except PollingTimeoutException: # Try to receive/close
                 user_handler.close_connection(connection, addr)
