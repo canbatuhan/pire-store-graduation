@@ -8,10 +8,10 @@ PASSWORD="tolga.halit.batu"
 BRANCH="cluster"
 
 # Parse arguments
-while getopts :as:f: flag ; do
+while getopts :ab:s:f: flag ; do
     case "${flag}" in
-        b) BRANCH=${OPTARG};;
         a) START=0; FINISH=9;;
+        b) BRANCH=${OPTARG};;
         s) START=${OPTARG};;
         f) FINISH=${OPTARG};;
     esac
