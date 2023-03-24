@@ -7,5 +7,5 @@ $ABS_CLUSTER_PATH/send.sh create d 63 &
 $ABS_CLUSTER_PATH/send.sh create e 105 &
 $ABS_CLUSTER_PATH/send.sh create f 1773 &
 $ABS_CLUSTER_PATH/send.sh create g 2501 &
-$ABS_CLUSTER_PATH/send.sh create h 1984
+$ABS_CLUSTER_PATH/send.sh create h 1984 &
 
