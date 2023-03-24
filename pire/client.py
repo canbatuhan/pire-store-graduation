@@ -256,7 +256,6 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def start(self):
         self.__comm_handler.start()
-        self.__statemachine.start()
         self.__database.start()
 
     def __grpc_thread(self) -> None:
