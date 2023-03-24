@@ -10,3 +10,4 @@ while [ $COUNT -le $N_ITERATIONS ] ; do
     $ABS_CLUSTER_PATH/send.sh read e &
     COUNT=$(($COUNT+1))
 done
+sleep 2
