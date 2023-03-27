@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # Send and receive
     user_socket.connect(dst_addr)
     user_socket.send(request.encode("utf-8"))
-    ack = dict(json.loads(user_socket.recv(1024)))
+    ack = dict(json.loads(user_socket.recv(1024).decode("utf-8")))
     user_socket.close()
 
     # Timer ends
