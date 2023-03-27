@@ -32,7 +32,7 @@ MAX_VAL = 1e+4
 
 def __generate_random_request() -> str:
     key = "".join(random.choice(LETTERS) for _ in range(KEY_LEN))
-    value = random.choice(range(MAX_VAL))
+    value = random.choice(range(int(MAX_VAL)))
     return "{}({},{})".format("create", key, value)
 
 
