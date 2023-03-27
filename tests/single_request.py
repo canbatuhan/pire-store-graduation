@@ -21,7 +21,7 @@ PORT = 9000
 if __name__ == "__main__":
     user_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     dst_addr = (random.choice(HOSTS), PORT)
-    request = " ".join([COMMAND, KEY, VALUE])
+    request = "{}({},{})".format("create", KEY, VALUE)
 
     # Timer starts
     start_time = time.perf_counter()

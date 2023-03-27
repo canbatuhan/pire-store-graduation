@@ -33,7 +33,7 @@ MAX_VAL = 1e+4
 def __generate_random_request() -> str:
     key = "".join(random.choice(LETTERS) for _ in range(KEY_LEN))
     value = random.choice(range(MAX_VAL))
-    return " ".join(["create", key, value])
+    return "{}({},{})".format("create", key, value)
 
 
 def send_create_request(request:str) -> PerformanceMetrics:

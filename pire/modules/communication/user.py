@@ -71,8 +71,8 @@ class UserHandler:
 
     def send_ack(self, connection:socket.socket, addr:Tuple[str,int], ack:bool, value:bytes) -> None:
         try: # Try to send
-            if ack: ack_msg = '{\"success\": true, \"value\": {})'.format(value)
-            else: ack_msg = '{\"success\": false, \"value\": {}}'.format(value)
+            if ack: ack_msg = json.dumps({"success": True, "value": value})
+            else: ack_msg = json.dumps({"success": False, "value": value})
             
             connection.send(ack_msg.encode(ENCODING))
             self.__logger.info("{}:{} is acknowledged '{}'".format(*addr, ack_msg))
