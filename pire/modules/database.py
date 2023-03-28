@@ -12,6 +12,12 @@ class LocalDatabase:
     def start(self) -> None:
         self.__logger.info("Started.")
 
+    def get_size(self) -> int:
+        return len(self.__db.getall())
+
+    def save(self) -> None:
+        self.__db.dump()
+
     def create(self, key:object, value:object) -> bool:
         if self.__db.exists(key):
             old_value = self.__db.get(key)

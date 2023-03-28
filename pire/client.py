@@ -1,3 +1,4 @@
+import time
 from typing import List, Tuple
 import grpc
 import json
@@ -11,7 +12,7 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_ID
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, INITIAL_POLL_TIME, MAX_ID, MAX_POLL_TIME
 from pire.util.enums import Events
 from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
@@ -250,6 +251,24 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         self.__store_service.start()
         self.__store_service.wait_for_termination()
 
+    def __database_thread(self) -> None:
+        pair_count = self.__database.get_size()
+        poll_time = INITIAL_POLL_TIME
+
+        while True: # Infinite loop
+            time.sleep(poll_time)
+
+            if self.__database.get_size() == pair_count:
+                self.__database.save()
+                poll_time = INITIAL_POLL_TIME
+
+            else: # Database is active
+                poll_time *= 2
+                if poll_time > MAX_POLL_TIME:
+                    poll_time = INITIAL_POLL_TIME
+    
+            pair_count = self.__database.get_size()
+
     def __user_thread(self) -> None:
         user_handler = self.__comm_handler.user_request_handler
 
@@ -282,4 +301,5 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def run(self):
         Thread(target=self.__grpc_thread).start()
+        Thread(target=self.__database_thread).start()
         Thread(target=self.__user_thread).start()
