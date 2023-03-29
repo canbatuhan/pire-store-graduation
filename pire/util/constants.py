@@ -12,6 +12,10 @@ MIN_REPLICAS = 1
 INITIAL_POLL_TIME = 5.2e-9 # 52 nanoseconds
 MAX_POLL_TIME = 0.250 # 250 milliseconds
 
+# Database Constants
+MIN_DUMP_TIMEOUT = 0.025 # 25 milliseconds
+MAX_DUMP_TIMEOUT = 2 # 2 seconds
+
 # User Interface Constants
 BUFFER_SIZE = 256
 ENCODING = "utf-8"
