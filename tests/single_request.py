@@ -30,7 +30,6 @@ if __name__ == "__main__":
     user_socket.connect(dst_addr)
     user_socket.send(request.encode("utf-8"))
     ack = json.loads(user_socket.recv(1024).decode("utf-8"))
-    user_socket.close()
 
     # Timer ends
     duration = time.perf_counter() - start_time
@@ -38,3 +37,4 @@ if __name__ == "__main__":
     # Print output
     print("Response : {}".format(ack.get("success")))
     print("Value    : {}".format(ack.get("value")))
+    print("Duration : {}".format(duration))

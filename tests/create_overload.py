@@ -43,7 +43,6 @@ def send_create_request(request:str) -> PerformanceMetrics:
     user_socket.connect(dst_addr)
     user_socket.send(request.encode("utf-8"))
     ack = json.loads(user_socket.recv(1024).decode("utf-8"))
-    user_socket.close()
 
     return PerformanceMetrics(ack.get("success"), ack.get("value"))
 
