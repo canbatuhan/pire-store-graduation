@@ -12,7 +12,7 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, INITIAL_POLL_TIME, MAX_ID, MAX_POLL_TIME
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_DUMP_TIMEOUT, MAX_ID, MIN_DUMP_TIMEOUT
 from pire.util.enums import Events
 from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
@@ -268,19 +268,25 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def __database_thread(self) -> None:
         pair_count = self.__database.get_size()
-        poll_time = INITIAL_POLL_TIME
+        timeout = MIN_DUMP_TIMEOUT
 
         while True: # Infinite loop
-            time.sleep(poll_time)
+            time.sleep(timeout)
+            
+            try: # Try to dump
+                if self.__database.get_size() == pair_count:
+                    self.__database.save()
+                    timeout = MIN_DUMP_TIMEOUT
 
-            if self.__database.get_size() == pair_count:
-                self.__database.save()
-                poll_time = INITIAL_POLL_TIME
+                else: # Database is active
+                    timeout *= 2
+                    if timeout > MAX_DUMP_TIMEOUT:
+                        timeout = MAX_DUMP_TIMEOUT
 
-            else: # Database is active
-                poll_time *= 2
-                if poll_time > MAX_POLL_TIME:
-                    poll_time = INITIAL_POLL_TIME
+            except: # Failed to dump
+                timeout *= 2
+                if timeout > MAX_DUMP_TIMEOUT:
+                    timeout = MAX_DUMP_TIMEOUT
     
             pair_count = self.__database.get_size()
 
