@@ -10,7 +10,7 @@ MIN_REPLICAS = 1
 
 # State Machine Constants
 INITIAL_POLL_TIME = 5.2e-9 # 52 nanoseconds
-MAX_POLL_TIME = 0.250 # 250 milliseconds
+MAX_POLL_TIME = 0.050 # 50 milliseconds
 
 # Database Constants
 MIN_DUMP_TIMEOUT = 0.025 # 25 milliseconds
