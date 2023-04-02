@@ -1,3 +1,4 @@
+import copy
 import socket
 import time
 from typing import Dict, List, Tuple
@@ -33,7 +34,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
     def __create_statemachine_if_not_exists(self, key:bytes) -> None:
         if self.__pair_machine_map.get(key) == None:
-            statemachine = self.__sample_statemachine
+            statemachine = copy.deepcopy(self.__sample_statemachine)
             statemachine.start()
             self.__pair_machine_map.update({key: statemachine})
     
