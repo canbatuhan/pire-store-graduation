@@ -15,7 +15,6 @@ class ClusterHandler:
         self.__grpc_port = grpc_port
         self.__neighbours_addr = neighbours_addr
         self.__neighbours:Dict[Tuple[str,int],grpc.Channel] = dict()
-        self.__logger = Logger("Communication-Handler-Cluster-Handler")
 
 
     """ GREET Protocol Implementation Starts """
@@ -34,15 +33,13 @@ class ClusterHandler:
                 else: # Unable to greet
                     self.__logger.failure("Could not greeted with {}:{}.".format(*addr))
             
-            except Exception as exception: # Channel is broken or ERROR IN CODE!
-                self.__logger.failure("Exception Thrown: {}".format(
-                    exception.with_traceback(None)))
+            except Exception: # Channel is broken or ERROR IN CODE!
+                pass
         
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
         channel = grpc.insecure_channel(addr_as_str(*addr))
         self.__neighbours.update({addr:channel})
-        self.__logger.info("Greeted with {}:{}.".format(*addr))
 
     """ GREET Protocol Implementation Ends """
 
@@ -58,16 +55,10 @@ class ClusterHandler:
                 command=event.value, key=key, value=value, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no and event == Events.CREATE:
-                self.__logger.info("Pair '{}:{}' is created in {}:{} ".format(
-                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
-                
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -115,16 +106,10 @@ class ClusterHandler:
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.success:
-                self.__logger.info("Pair '{}:{}' is read from {}:{} ".format(
-                    key.decode(ENCODING), response.value.decode(ENCODING), *dst_addr))
-                
             return response.success, response.value
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
@@ -154,17 +139,11 @@ class ClusterHandler:
                 command=Events.UPDATE.value,
                 key=key, value=value, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Pair '{}:{}' is updated in {}:{} ".format(
-                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
-                
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))     
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -198,16 +177,10 @@ class ClusterHandler:
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Key '{}' is deleted in {}:{} ".format(
-                    key.decode(ENCODING), *dst_addr))
-                
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -254,5 +227,4 @@ class ClusterHandler:
         for addr in self.__neighbours_addr:
             channel = grpc.insecure_channel(addr_as_str(*addr))
             self.__neighbours.update({addr:channel})
-        self.__logger.info("Listening on {}:{}.".format(self.__host, self.__grpc_port))
         self.__send_greetings()

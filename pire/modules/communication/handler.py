@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 from pire.modules.communication.cluster import ClusterHandler
 from pire.modules.communication.user import UserHandler
-from pire.util.logger import Logger
 
 
 class CommunicationHandler:
@@ -27,12 +26,10 @@ class CommunicationHandler:
         neighbour_addrs = self.__get_neighbour_addrs()
         self.cluster_handler = ClusterHandler(self.__host, self.__port, neighbour_addrs)
         self.user_request_handler = UserHandler(self.__host, self.__port+1000)
-        self.__logger = Logger("Communication-Handler")
 
     def get_address(self) -> Tuple[Tuple[str,int],Tuple[str,int]]:
         return (self.__host, self.__port), (self.__host, self.__port+5)
 
     def start(self) -> None:
-        self.__logger.info("Started.")
         self.cluster_handler.start()
         self.user_request_handler.start()

@@ -9,7 +9,11 @@ digraph G {
     /* 2 CONNECTIONS */
     "PiRe-00" -> "PiRe-01" [arrowhead="both"]
     "PiRe-00" -> "PiRe-02" [arrowhead="both"]
+    "PiRe-00" -> "PiRe-03" [arrowhead="both"]
+    "PiRe-00" -> "PiRe-04" [arrowhead="both"]
+    "PiRe-01" -> "PiRe-02" [arrowhead="both"]
     "PiRe-01" -> "PiRe-03" [arrowhead="both"]
+    "PiRe-01" -> "PiRe-04" [arrowhead="both"]
     "PiRe-02" -> "PiRe-03" [arrowhead="both"]
     "PiRe-02" -> "PiRe-04" [arrowhead="both"]
     "PiRe-03" -> "PiRe-04" [arrowhead="both"]
