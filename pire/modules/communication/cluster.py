@@ -13,16 +13,15 @@ class ClusterHandler:
         self.__host = host
         self.__grpc_port = grpc_port
         self.__neighbours_addr = neighbours_addr
-        self.__neighbours:Dict[Tuple[str,int],grpc.Channel] = dict()
+        self.__neighbours:Dict[Tuple[str,int],pirestore_pb2_grpc.PireKeyValueStoreStub] = dict()
 
 
     """ GREET Protocol Implementation Starts """
 
     def __send_greetings(self) -> None:
-        for addr, channel in self.__neighbours.items():
+        for addr, stub in self.__neighbours.items():
             try: # Try to send a message
-                greeting_stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-                response = greeting_stub.Greet(pirestore_pb2.Greeting(
+                response = stub.Greet(pirestore_pb2.Greeting(
                     source=pirestore_pb2.Address(host=self.__host, port=self.__grpc_port),
                     destination=pirestore_pb2.Address(host=addr[0], port=addr[1])))
             
@@ -32,7 +31,7 @@ class ClusterHandler:
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
         channel = grpc.insecure_channel(addr_as_str(*addr))
-        self.__neighbours.update({addr:channel})
+        self.__neighbours.update({addr:pirestore_pb2_grpc.PireKeyValueStoreStub(channel)})
 
     """ GREET Protocol Implementation Ends """
 
@@ -41,8 +40,7 @@ class ClusterHandler:
 
     def __call_create_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> int:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Create(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=event.value, key=key, value=value, encoding=ENCODING,
@@ -92,8 +90,7 @@ class ClusterHandler:
     
     def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Read(pirestore_pb2.ReadRequest(
                 id=request_id, command=Events.READ.value,
                 key=key, encoding=ENCODING,
@@ -125,8 +122,7 @@ class ClusterHandler:
     
     def __call_update_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes, value:bytes) -> int:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Update(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=Events.UPDATE.value,
@@ -162,8 +158,7 @@ class ClusterHandler:
     
     def __call_delete_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes) -> int:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Delete(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=Events.DELETE.value,
@@ -219,5 +214,5 @@ class ClusterHandler:
         addr_as_str = lambda h, p : "{}:{}".format(h, p) 
         for addr in self.__neighbours_addr:
             channel = grpc.insecure_channel(addr_as_str(*addr))
-            self.__neighbours.update({addr:channel})
+            self.__neighbours.update({addr:pirestore_pb2_grpc.PireKeyValueStoreStub(channel)})
         self.__send_greetings()
