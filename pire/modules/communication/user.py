@@ -1,6 +1,5 @@
 import json
 import socket
-import re
 from typing import Tuple
 
 from pire.util.constants import BUFFER_SIZE, ENCODING
