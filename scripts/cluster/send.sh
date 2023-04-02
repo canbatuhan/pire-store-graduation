@@ -27,14 +27,14 @@ MESSAGE="exit"
 # create(x,42) or update(x,42)
 if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "update" ] ; then
     if [ -n "$VALUE" ] ; then
-        MESSAGE="$COMMAND($KEY,$VALUE)"
+        MESSAGE="{\"command\":\"$COMMAND\", \"key\":\"$KEY\", \"value\":\"$VALUE\"}"
     fi
 fi
 
 # read(x) or delete(x)
 if [ "$COMMAND" = "read" ] || [ "$COMMAND" = "delete" ] ; then
     if [ -z "$VALUE" ] ; then
-        MESSAGE="$COMMAND($KEY)"
+        MESSAGE="{\"command\":\"$COMMAND\", \"key\":\"$KEY\", \"value\":\"$VALUE\"}"
     fi
 fi
 
