@@ -36,34 +36,26 @@ class UserHandler:
         return user_request
 
     def parse_request(self, request:bytes) -> Tuple[Events,bytes,bytes]:
-        request_as_str = request.decode(ENCODING)
-        create_pattern = re.compile(r'create\((\w+),(\d+)\)')
-        read_pattern = re.compile(r'read\((\w+)\)')
-        update_pattern = re.compile(r'update\((\w+),(\d+)\)')
-        delete_pattern = re.compile(r'delete\((\w+)\)')
+        request_as_dict = dict(json.loads(request))
 
-        if re.match(create_pattern, request_as_str):
-            match = re.match(create_pattern, request_as_str)
+        if request_as_dict.get("command") == Events.CREATE.value:
             return (Events.CREATE,
-                    match.group(1).encode(ENCODING),
-                    match.group(2).encode(ENCODING))
-
-        elif re.match(read_pattern, request_as_str):
-            match = re.match(read_pattern, request_as_str)
+                    request_as_dict.get("key").encode(ENCODING),
+                    request_as_dict.get("value").encode(ENCODING))
+        
+        elif request_as_dict.get("command") == Events.READ.value:
             return (Events.READ,
-                    match.group(1).encode(ENCODING),
+                    request_as_dict.get("key").encode(ENCODING),
                     None)
-
-        elif re.match(update_pattern, request_as_str):
-            match = re.match(update_pattern, request_as_str)
+        
+        elif request_as_dict.get("command") == Events.UPDATE.value:
             return (Events.UPDATE,
-                    match.group(1).encode(ENCODING),
-                    match.group(2).encode(ENCODING))
-
-        elif re.match(delete_pattern, request_as_str):
-            match = re.match(delete_pattern, request_as_str)
+                    request_as_dict.get("key").encode(ENCODING),
+                    request_as_dict.get("value").encode(ENCODING))
+        
+        elif request_as_dict.get("command") == Events.DELETE.value:
             return (Events.DELETE,
-                    match.group(1).encode(ENCODING),
+                    request_as_dict.get("key").encode(ENCODING),
                     None)
 
         else: # User entered invalid request
