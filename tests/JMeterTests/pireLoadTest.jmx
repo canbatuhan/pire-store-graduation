@@ -26,11 +26,48 @@
         <boolProp name="ThreadGroup.same_user_on_next_iteration">false</boolProp>
       </ThreadGroup>
       <hashTree>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="http-sampler" enabled="false">
+          <boolProp name="HTTPSampler.postBodyRaw">true</boolProp>
+          <elementProp name="HTTPsampler.Arguments" elementType="Arguments">
+            <collectionProp name="Arguments.arguments">
+              <elementProp name="" elementType="HTTPArgument">
+                <boolProp name="HTTPArgument.always_encode">false</boolProp>
+                <stringProp name="Argument.value">{&quot;key&quot;: &quot;${random_key}&quot;, &quot;value&quot;:&quot;${random_val}&quot;}&#xd;
+</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+            </collectionProp>
+          </elementProp>
+          <stringProp name="HTTPSampler.domain">192.168.1.12${random_node}</stringProp>
+          <stringProp name="HTTPSampler.port">2379</stringProp>
+          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+          <stringProp name="HTTPSampler.path">/v3/kv/put</stringProp>
+          <stringProp name="HTTPSampler.method">POST</stringProp>
+          <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+          <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+          <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+          <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+          <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+          <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+          <stringProp name="HTTPSampler.response_timeout"></stringProp>
+        </HTTPSamplerProxy>
+        <hashTree>
+          <HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="header-manager" enabled="false">
+            <collectionProp name="HeaderManager.headers">
+              <elementProp name="" elementType="Header">
+                <stringProp name="Header.name">Content-Type</stringProp>
+                <stringProp name="Header.value">application/json</stringProp>
+              </elementProp>
+            </collectionProp>
+          </HeaderManager>
+          <hashTree/>
+        </hashTree>
         <TCPSampler guiclass="TCPSamplerGui" testclass="TCPSampler" testname="tcp-sampler" enabled="true">
           <stringProp name="TCPSampler.server">192.168.1.12${random_node}</stringProp>
           <boolProp name="TCPSampler.reUseConnection">false</boolProp>
           <stringProp name="TCPSampler.port">9000</stringProp>
-          <boolProp name="TCPSampler.nodelay">true</boolProp>
+          <boolProp name="TCPSampler.nodelay">false</boolProp>
           <stringProp name="TCPSampler.timeout"></stringProp>
           <stringProp name="TCPSampler.request">create(${random_key},${random_val})</stringProp>
           <boolProp name="TCPSampler.closeConnection">false</boolProp>
@@ -170,7 +207,7 @@
         <RandomVariableConfig guiclass="TestBeanGUI" testclass="RandomVariableConfig" testname="random_val" enabled="true">
           <stringProp name="maximumValue">9999</stringProp>
           <stringProp name="minimumValue">0</stringProp>
-          <stringProp name="outputFormat"></stringProp>
+          <stringProp name="outputFormat">0000</stringProp>
           <boolProp name="perThread">false</boolProp>
           <stringProp name="randomSeed">1984</stringProp>
           <stringProp name="variableName">random_val</stringProp>
