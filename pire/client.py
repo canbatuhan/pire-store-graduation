@@ -219,6 +219,39 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
     """ gRPC Service Implementations End """
 
 
+    """ Helper Functions Start """
+
+    def __grpc_thread(self) -> None:
+        grpc_addr, _ = self.__comm_handler.get_address()
+        pirestore_pb2_grpc.add_PireKeyValueStoreServicer_to_server(self, self.__store_service)
+        self.__store_service.add_insecure_port("0.0.0.0:{}".format(grpc_addr[1]))
+        self.__store_service.start()
+        self.__store_service.wait_for_termination()
+
+    def __database_thread(self) -> None:
+        pair_count = self.__database.get_size()
+        timeout = MIN_DUMP_TIMEOUT
+
+        while True: # Infinite loop
+            time.sleep(timeout)
+            
+            try: # Try to dump
+                if self.__database.get_size() == pair_count:
+                    self.__database.save()
+                    timeout = MIN_DUMP_TIMEOUT
+
+                else: # Database is active
+                    timeout *= 2
+                    if timeout > MAX_DUMP_TIMEOUT:
+                        timeout = MAX_DUMP_TIMEOUT
+
+            except: # Failed to dump
+                timeout *= 2
+                if timeout > MAX_DUMP_TIMEOUT:
+                    timeout = MAX_DUMP_TIMEOUT
+    
+            pair_count = self.__database.get_size()
+
     def __handle_request(self, event:Events, key:bytes, value:bytes) -> Tuple[bool, bytes]:
         cluster_handler = self.__comm_handler.cluster_handler
         replica_no = 0
@@ -254,42 +287,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             random_id, replica_no, event, key, value)
         
         return success, read_value
-
-    def start(self):
-        self.__comm_handler.start()
-        self.__database.start()
-
-    def __grpc_thread(self) -> None:
-        grpc_addr, _ = self.__comm_handler.get_address()
-        pirestore_pb2_grpc.add_PireKeyValueStoreServicer_to_server(self, self.__store_service)
-        self.__store_service.add_insecure_port("0.0.0.0:{}".format(grpc_addr[1]))
-        self.__store_service.start()
-        self.__store_service.wait_for_termination()
-
-    def __database_thread(self) -> None:
-        pair_count = self.__database.get_size()
-        timeout = MIN_DUMP_TIMEOUT
-
-        while True: # Infinite loop
-            time.sleep(timeout)
-            
-            try: # Try to dump
-                if self.__database.get_size() == pair_count:
-                    self.__database.save()
-                    timeout = MIN_DUMP_TIMEOUT
-
-                else: # Database is active
-                    timeout *= 2
-                    if timeout > MAX_DUMP_TIMEOUT:
-                        timeout = MAX_DUMP_TIMEOUT
-
-            except: # Failed to dump
-                timeout *= 2
-                if timeout > MAX_DUMP_TIMEOUT:
-                    timeout = MAX_DUMP_TIMEOUT
     
-            pair_count = self.__database.get_size()
-
     def __user_thread(self) -> None:
         user_handler = self.__comm_handler.user_request_handler
 
@@ -320,6 +318,13 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
             except ConnectionLostException:
                 pass
+
+    """ Helper Functions End """
+
+
+    def start(self):
+        self.__comm_handler.start()
+        self.__database.start()
 
     def run(self):
         Thread(target=self.__grpc_thread).start()
