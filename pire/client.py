@@ -321,11 +321,12 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
     def __user_thread(self) -> None:
         request_handler_pool = futures.ThreadPoolExecutor(max_workers=N_HANDLER)
         user_handler = self.__comm_handler.user_request_handler
+        request_handler_pool = futures.ThreadPoolExecutor(max_workers=N_HANDLER)
 
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
             request_handler_pool.submit(self.__request_handler_callback, connection, addr)
-
+            
     """ Helper Functions End """
 
 
