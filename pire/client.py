@@ -1,3 +1,4 @@
+import socket
 import time
 from typing import Dict, List, Tuple
 import grpc
@@ -12,7 +13,7 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_DUMP_TIMEOUT, MAX_ID, MIN_DUMP_TIMEOUT
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_DUMP_TIMEOUT, MAX_ID, MIN_DUMP_TIMEOUT, N_HANDLER, N_SERVICER
 from pire.util.enums import Events
 from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
@@ -23,7 +24,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         file = open(CLIENT_CONFIG_PATH, 'r')
         config_paths = dict(json.load(file))
         self.__id = client_id
-        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=N_SERVICER))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
         self.__pair_machine_map:Dict[bytes,ReplicatedStateMachine] = dict()
         self.__statemachine_config = config_paths.get("statemachine")
@@ -288,36 +289,42 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         
         return success, read_value
     
+    def __request_handler_callback(self, connection:socket.socket, addr:Tuple[str,int]) -> None:
+        user_handler = self.__comm_handler.user_request_handler
+
+        try: # Handle user requests
+            request = user_handler.receive_request(connection, addr)
+
+            # Parse requests: create(...), read(...), update(...), delete(...)
+            event, key, value = user_handler.parse_request(request)
+            self.__create_statemachine_if_not_exists(key)
+            self.__pair_machine_map.get(key).poll(event)
+
+            # Trigger transitions
+            self.__pair_machine_map.get(key).trigger(event)
+            ack, read_value = self.__handle_request(event, key, value)
+
+            # Send acknowledgement to user
+            user_handler.send_ack(connection, addr, ack, read_value)
+            user_handler.close_connection(connection, addr)
+            self.__pair_machine_map.get(key).trigger(Events.DONE)
+            
+        except PollingTimeoutException: # Try to receive/close
+            user_handler.close_connection(connection, addr)
+
+        except InvalidRequestType: # Try to receive/close
+            user_handler.close_connection(connection, addr)
+
+        except ConnectionLostException:
+            pass
+    
     def __user_thread(self) -> None:
+        request_handler_pool = futures.ThreadPoolExecutor(max_workers=N_HANDLER)
         user_handler = self.__comm_handler.user_request_handler
 
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
-            try: # Handle user requests
-                request = user_handler.receive_request(connection, addr)
-
-                # Parse requests: create(...), read(...), update(...), delete(...)
-                event, key, value = user_handler.parse_request(request)
-                self.__create_statemachine_if_not_exists(key)
-                self.__pair_machine_map.get(key).poll(event)
-
-                # Trigger transitions
-                self.__pair_machine_map.get(key).trigger(event)
-                ack, read_value = self.__handle_request(event, key, value)
-
-                # Send acknowledgement to user
-                user_handler.send_ack(connection, addr, ack, read_value)
-                user_handler.close_connection(connection, addr)
-                self.__pair_machine_map.get(key).trigger(Events.DONE)
-            
-            except PollingTimeoutException: # Try to receive/close
-                user_handler.close_connection(connection, addr)
-
-            except InvalidRequestType: # Try to receive/close
-                user_handler.close_connection(connection, addr)
-
-            except ConnectionLostException:
-                pass
+            request_handler_pool.submit(self.__request_handler_callback, connection, addr)
 
     """ Helper Functions End """
 
