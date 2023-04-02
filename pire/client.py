@@ -1,3 +1,4 @@
+import socket
 import time
 from typing import List, Tuple
 import grpc
@@ -12,7 +13,7 @@ from pire.modules.communication.handler import CommunicationHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database import LocalDatabase
 
-from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, INITIAL_POLL_TIME, MAX_DUMP_TIMEOUT, MAX_ID, MAX_POLL_TIME, MIN_DUMP_TIMEOUT
+from pire.util.constants import CLIENT_CONFIG_PATH, ENCODING, MAX_DUMP_TIMEOUT, MAX_ID, MIN_DUMP_TIMEOUT, N_SERVICER, N_HANDLER
 from pire.util.enums import Events
 from pire.util.exceptions import ConnectionLostException, InvalidRequestType, PollingTimeoutException
 
@@ -23,7 +24,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         file = open(CLIENT_CONFIG_PATH, 'r')
         config_paths = dict(json.load(file))
         self.__id = client_id
-        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self.__store_service = grpc.server(futures.ThreadPoolExecutor(max_workers=N_SERVICER))
         self.__comm_handler = CommunicationHandler(self.__id, config_paths.get("topology"))
         self.__statemachine = ReplicatedStateMachine(config_paths.get("statemachine"))
         self.__database = LocalDatabase()
@@ -271,36 +272,42 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             random_id, replica_no, event, key, value)
         
         return success, read_value
+    
+    def __request_handler_callback(self, connection:socket.socket, addr:Tuple[str,int]):
+        user_handler = self.__comm_handler.user_request_handler
+        
+        try: # Handle user requests
+            request = user_handler.receive_request(connection, addr)
+
+            # Parse requests: create(...), read(...), update(...), delete(...)
+            event, key, value = user_handler.parse_request(request)
+            self.__statemachine.poll(event)
+
+            # Trigger transitions
+            self.__statemachine.trigger(event)
+            ack, read_value = self.__handle_request(event, key, value)
+
+            # Send acknowledgement to user
+            user_handler.send_ack(connection, addr, ack, read_value)
+            user_handler.close_connection(connection, addr)
+            self.__statemachine.trigger(Events.DONE)
+        
+        except PollingTimeoutException: # Try to receive/close
+            user_handler.close_connection(connection, addr)
+
+        except InvalidRequestType: # Try to receive/close
+            user_handler.close_connection(connection, addr)
+
+        except ConnectionLostException:
+            pass
 
     def __user_thread(self) -> None:
         user_handler = self.__comm_handler.user_request_handler
+        request_handler_pool = futures.ThreadPoolExecutor(max_workers=N_HANDLER)
 
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
-            try: # Handle user requests
-                request = user_handler.receive_request(connection, addr)
-
-                # Parse requests: create(...), read(...), update(...), delete(...)
-                event, key, value = user_handler.parse_request(request)
-                self.__statemachine.poll(event)
-
-                # Trigger transitions
-                self.__statemachine.trigger(event)
-                ack, read_value = self.__handle_request(event, key, value)
-
-                # Send acknowledgement to user
-                user_handler.send_ack(connection, addr, ack, read_value)
-                user_handler.close_connection(connection, addr)
-                self.__statemachine.trigger(Events.DONE)
-            
-            except PollingTimeoutException: # Try to receive/close
-                user_handler.close_connection(connection, addr)
-
-            except InvalidRequestType: # Try to receive/close
-                user_handler.close_connection(connection, addr)
-
-            except ConnectionLostException:
-                pass
+            request_handler_pool.submit(self.__request_handler_callback, connection, addr)
     
     """ Helper Functions End """
 
