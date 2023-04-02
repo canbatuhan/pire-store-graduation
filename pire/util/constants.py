@@ -14,8 +14,8 @@ INITIAL_POLL_TIME = 5.2e-9 # 52 nanoseconds
 MAX_POLL_TIME = 0.050 # 50 milliseconds
 
 # Database Constants
-MIN_DUMP_TIMEOUT = 0.025 # 25 milliseconds
-MAX_DUMP_TIMEOUT = 2 # 2 seconds
+MIN_DUMP_TIMEOUT = 1 # 1 seconds
+MAX_DUMP_TIMEOUT = 32 # 32 seconds
 
 # User Interface Constants
 N_HANDLER = 4
