@@ -25,14 +25,14 @@ PORT=9000
 MESSAGE="exit"
 
 # create(x,42) or update(x,42)
-if [ "$COMMAND" = "create" ] || [ "$COMMAND" = "update" ] ; then
+if [ "$COMMAND" = "CREATE" ] || [ "$COMMAND" = "UPDATE" ] ; then
     if [ -n "$VALUE" ] ; then
         MESSAGE="{\"command\":\"$COMMAND\", \"key\":\"$KEY\", \"value\":\"$VALUE\"}"
     fi
 fi
 
 # read(x) or delete(x)
-if [ "$COMMAND" = "read" ] || [ "$COMMAND" = "delete" ] ; then
+if [ "$COMMAND" = "READ" ] || [ "$COMMAND" = "DELETE" ] ; then
     if [ -z "$VALUE" ] ; then
         MESSAGE="{\"command\":\"$COMMAND\", \"key\":\"$KEY\"}"
     fi

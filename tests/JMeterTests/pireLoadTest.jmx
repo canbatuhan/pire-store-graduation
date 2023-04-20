@@ -69,7 +69,7 @@
           <stringProp name="TCPSampler.port">9000</stringProp>
           <boolProp name="TCPSampler.nodelay">false</boolProp>
           <stringProp name="TCPSampler.timeout"></stringProp>
-          <stringProp name="TCPSampler.request">create(${random_key},${random_val})</stringProp>
+          <stringProp name="TCPSampler.request">{&quot;command&quot;: &quot;CREATE&quot;, &quot;key&quot;:&quot;${random_key}&quot;, &quot;value&quot;:&quot;${random_val}&quot;}</stringProp>
           <boolProp name="TCPSampler.closeConnection">false</boolProp>
           <stringProp name="ConfigTestElement.username"></stringProp>
           <stringProp name="ConfigTestElement.password"></stringProp>
