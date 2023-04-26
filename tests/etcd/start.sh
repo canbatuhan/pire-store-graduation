@@ -29,9 +29,6 @@ HOST_4="192.168.1.124"
 # etcd Cluster
 CLUSTER="${NAME_0}=http://${HOST_0}:${CLUSTER_PORT},${NAME_1}=http://${HOST_1}:${CLUSTER_PORT},${NAME_2}=http://${HOST_2}:${CLUSTER_PORT},${NAME_3}=http://${HOST_3}:${CLUSTER_PORT},${NAME_4}=http://${HOST_4}:${CLUSTER_PORT}"
 
-# Commands
-EXIT="exit"
-
 # Parse arguments
 while getopts :n: flag ; do
     case "${flag}" in
