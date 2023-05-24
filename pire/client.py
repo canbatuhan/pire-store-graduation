@@ -307,15 +307,13 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
 
             # Send acknowledgement to user
             user_handler.send_ack(connection, addr, ack, read_value)
-            user_handler.close_connection(connection, addr)
             self.__pair_machine_map.get(key).trigger(Events.DONE)
             
         except PollingTimeoutException: # Try to receive/close
             user_handler.send_ack(connection, addr, False, 0)
-            user_handler.close_connection(connection, addr)
 
         except InvalidRequestType: # Try to receive/close
-            user_handler.close_connection(connection, addr)
+            pass
 
         except ConnectionLostException:
             pass
@@ -328,6 +326,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
             request_handler_pool.submit(self.__request_handler_callback, connection, addr)
+            self.__comm_handler.user_request_handler.close_connection(connection, addr)
             
     """ Helper Functions End """
 
