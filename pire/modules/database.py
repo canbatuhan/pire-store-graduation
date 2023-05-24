@@ -36,7 +36,9 @@ class LocalDatabase:
     def update(self, key:object, value:object) -> bool:
         if self.__db.exists(key):
             self.__db.set(key, value)
-        return self.__db.exists(key)
+            return True
+        else:
+            return False
 
     def delete(self, key:object) -> bool:
         if self.__db.exists(key):

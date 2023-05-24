@@ -18,6 +18,6 @@ MIN_DUMP_TIMEOUT = 1 # 1 seconds
 MAX_DUMP_TIMEOUT = 32 # 32 seconds
 
 # User Interface Constants
-N_HANDLER = 1
+N_HANDLER = 4
 BUFFER_SIZE = 256
 ENCODING = "utf-8"
