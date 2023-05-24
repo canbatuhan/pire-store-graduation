@@ -6,7 +6,6 @@ from pire.modules.service import pirestore_pb2
 from pire.modules.service import pirestore_pb2_grpc
 from pire.util.constants import ENCODING, MIN_REPLICAS, N_REPLICAS
 from pire.util.enums import Events
-from pire.util.logger import Logger
 
 
 class ClusterHandler:
@@ -14,35 +13,25 @@ class ClusterHandler:
         self.__host = host
         self.__grpc_port = grpc_port
         self.__neighbours_addr = neighbours_addr
-        self.__neighbours:Dict[Tuple[str,int],grpc.Channel] = dict()
-        self.__logger = Logger("Communication-Handler-Cluster-Handler")
+        self.__neighbours:Dict[Tuple[str,int],pirestore_pb2_grpc.PireKeyValueStoreStub] = dict()
 
 
     """ GREET Protocol Implementation Starts """
 
     def __send_greetings(self) -> None:
-        for addr, channel in self.__neighbours.items():
+        for addr, stub in self.__neighbours.items():
             try: # Try to send a message
-                greeting_stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
-                response = greeting_stub.Greet(pirestore_pb2.Greeting(
+                response = stub.Greet(pirestore_pb2.Greeting(
                     source=pirestore_pb2.Address(host=self.__host, port=self.__grpc_port),
                     destination=pirestore_pb2.Address(host=addr[0], port=addr[1])))
-
-                if response.success: # Greeted
-                    self.__logger.info("Greeted with {}:{}.".format(*addr))
-                
-                else: # Unable to greet
-                    self.__logger.failure("Could not greeted with {}:{}.".format(*addr))
             
-            except Exception as exception: # Channel is broken or ERROR IN CODE!
-                self.__logger.failure("Exception Thrown: {}".format(
-                    exception.with_traceback(None)))
+            except Exception: # Channel is broken or ERROR IN CODE!
+                pass
         
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
         channel = grpc.insecure_channel(addr_as_str(*addr))
         self.__neighbours.update({addr:channel})
-        self.__logger.info("Greeted with {}:{}.".format(*addr))
 
     """ GREET Protocol Implementation Ends """
 
@@ -51,23 +40,16 @@ class ClusterHandler:
 
     def __call_create_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, event:Events, key:bytes, value:bytes) -> bool:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Create(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=event.value, key=key, value=value, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no and event == Events.CREATE:
-                self.__logger.info("Pair '{}:{}' is created in {}:{} ".format(
-                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
-                
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def create_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -108,23 +90,16 @@ class ClusterHandler:
     
     def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Read(pirestore_pb2.ReadRequest(
                 id=request_id, command=Events.READ.value,
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.success:
-                self.__logger.info("Pair '{}:{}' is read from {}:{} ".format(
-                    key.decode(ENCODING), response.value.decode(ENCODING), *dst_addr))
-                
             return response.success, response.value
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
@@ -147,24 +122,17 @@ class ClusterHandler:
     
     def __call_update_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes, value:bytes) -> int:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Update(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=Events.UPDATE.value,
                 key=key, value=value, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Pair '{}:{}' is updated in {}:{} ".format(
-                    key.decode(ENCODING), value.decode(ENCODING), *dst_addr))
-                
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))     
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def update_protocol(self, request_id:int, replica_no:int, key:bytes, value:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -190,24 +158,17 @@ class ClusterHandler:
     
     def __call_delete_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, replica_no:int, key:bytes) -> int:
         try: # Try to send a message
-            channel = self.__neighbours.get(dst_addr)
-            stub = pirestore_pb2_grpc.PireKeyValueStoreStub(channel)
+            stub = self.__neighbours.get(dst_addr)
             response = stub.Delete(pirestore_pb2.WriteRequest(
                 id=request_id, replica_no=replica_no,
                 command=Events.DELETE.value,
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            
-            if response.ack_no > replica_no:
-                self.__logger.info("Key '{}' is deleted in {}:{} ".format(
-                    key.decode(ENCODING), *dst_addr))
-                
             return response.ack_no
 
-        except Exception as exception: # Channel is broken or ERROR IN CODE!
-            self.__logger.failure("Exception Thrown: {}".format(
-                exception.with_traceback(None)))
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def delete_protocol(self, request_id:int, replica_no:int, key:bytes) -> Tuple[bool, int]:
         # Send CREATE message to one of the neighbours
@@ -253,6 +214,5 @@ class ClusterHandler:
         addr_as_str = lambda h, p : "{}:{}".format(h, p) 
         for addr in self.__neighbours_addr:
             channel = grpc.insecure_channel(addr_as_str(*addr))
-            self.__neighbours.update({addr:channel})
-        self.__logger.info("Listening on {}:{}.".format(self.__host, self.__grpc_port))
+            self.__neighbours.update({addr:pirestore_pb2_grpc.PireKeyValueStoreStub(channel)})
         self.__send_greetings()
