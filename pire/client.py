@@ -293,6 +293,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
             self.__statemachine.trigger(Events.DONE)
         
         except PollingTimeoutException: # Try to receive/close
+            user_handler.send_ack(connection, addr, False, 0)
             user_handler.close_connection(connection, addr)
 
         except InvalidRequestType: # Try to receive/close
