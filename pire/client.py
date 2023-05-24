@@ -326,7 +326,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         while True: # Infinite loop
             connection, addr = user_handler.establish_connection()
             request_handler_pool.submit(self.__request_handler_callback, connection, addr)
-            self.__comm_handler.user_request_handler.close_connection(connection, addr)
+            user_handler.close_connection(connection, addr)
             
     """ Helper Functions End """
 
