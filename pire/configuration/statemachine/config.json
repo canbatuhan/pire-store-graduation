@@ -18,7 +18,7 @@
 
     "transitions": [
         {"source": {"$ref": "#/states/0"},  "destination": {"$ref": "#/states/1"},  "event": "START",  "action": null},
-        {"source": {"$ref": "#/states/1"},  "destination": {"$ref": "#/states/7"},  "event": "END",  "action": null},
+        {"source": {"$ref": "#/states/1"},  "destination": {"$ref": "#/states/6"},  "event": "END",  "action": null},
 
         {"source": {"$ref": "#/states/1"},  "destination": {"$ref": "#/states/2"},  "event": "CREATE",  "action": null},
         {"source": {"$ref": "#/states/1"},  "destination": {"$ref": "#/states/3"},  "event": "READ",  "action": null},
