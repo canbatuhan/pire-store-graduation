@@ -17,13 +17,7 @@ class LocalDatabase:
         self.__db.dump()
 
     def create(self, key:object, value:object) -> bool:
-        if self.__db.exists(key):
-            old_value = self.__db.get(key)
-            self.__db.set(key, value)
-
-        else: # Key does not exist
-            self.__db.set(key, value)
-
+        self.__db.set(key, value)
         return self.__db.exists(key)
 
     def read(self, key:object) -> Tuple[bool,object]:
