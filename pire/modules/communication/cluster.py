@@ -59,7 +59,7 @@ class ClusterHandler:
             ack_no = self.__call_create_service(
                 (self.__host, self.__grpc_port), dst_addr,
                 request_id, replica_no,
-                Events.CREATE, key, value)
+                Events.CREATE.value, key, value)
                 
             if ack_no == replica_no + 1: # A pair is created directly
                 replica_no = ack_no # Next replica id to update
@@ -73,7 +73,7 @@ class ClusterHandler:
                 ack_no = self.__call_create_service(
                     (self.__host, self.__grpc_port), dst_addr,
                     request_id, replica_no,
-                    Events.CREATE_REDIR, key, value)
+                    Events.CREATE_REDIR.value, key, value)
 
                 if ack_no > replica_no:
                     replica_no = ack_no # Next replica id to create
