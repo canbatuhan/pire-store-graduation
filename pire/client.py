@@ -288,6 +288,7 @@ class PireClient(pirestore_pb2_grpc.PireKeyValueStoreServicer):
         success, read_value = cluster_handler.run_protocol(
             random_id, replica_no, event, key, value)
         
+        print(success, read_value)
         return success, read_value
     
     def __request_handler_callback(self, connection:socket.socket, addr:Tuple[str,int]) -> None:
