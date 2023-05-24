@@ -31,7 +31,7 @@ class ClusterHandler:
     def accept_greeting(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
         channel = grpc.insecure_channel(addr_as_str(*addr))
-        self.__neighbours.update({addr:channel})
+        self.__neighbours.update({addr:pirestore_pb2_grpc.PireKeyValueStoreStub(channel)})
 
     """ GREET Protocol Implementation Ends """
 
