@@ -96,8 +96,6 @@ class ClusterHandler:
                 key=key, encoding=ENCODING,
                 source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
                 destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-            print("Neighbour said...")
-            print(response.value)
             return response.success, response.value
 
         except Exception: # Channel is broken or ERROR IN CODE!
