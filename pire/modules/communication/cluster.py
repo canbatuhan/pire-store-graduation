@@ -89,17 +89,19 @@ class ClusterHandler:
     """ READ Protocol Implementation Starts """
     
     def __call_read_service(self, src_addr:Tuple[str,int], dst_addr:Tuple[str,int], request_id:int, key:bytes) -> Tuple[bool, bytes]:
-        """try: # Try to send a message"""
-        stub = self.__neighbours.get(dst_addr)
-        response = stub.Read(pirestore_pb2.ReadRequest(
-            id=request_id, command=Events.READ.value,
-            key=key, encoding=ENCODING,
-            source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
-            destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
-        return response.success, response.value
+        try: # Try to send a message
+            stub = self.__neighbours.get(dst_addr)
+            response = stub.Read(pirestore_pb2.ReadRequest(
+                id=request_id, command=Events.READ.value,
+                key=key, encoding=ENCODING,
+                source=pirestore_pb2.Address(host=src_addr[0], port=src_addr[1]),
+                destination=pirestore_pb2.Address(host=dst_addr[0], port=dst_addr[1])))
+            print("Neighbour said...")
+            print(response.value)
+            return response.success, response.value
 
-        """except Exception: # Channel is broken or ERROR IN CODE!
-            pass"""
+        except Exception: # Channel is broken or ERROR IN CODE!
+            pass
 
     def read_protocol(self, request_id:int, key:bytes) -> Tuple[bool, bytes]:
         random.shuffle(self.__neighbours_addr)
