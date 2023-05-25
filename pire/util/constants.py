@@ -6,7 +6,7 @@ LOG_FILE_PATH = "pire/docs/log.txt"
 # Cluster Constants
 MAX_ID = 1E+4
 N_REPLICAS = 3
-N_SERVICER = 5
+N_SERVICER = 10
 MIN_REPLICAS = 1
 
 # State Machine Constants
