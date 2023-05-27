@@ -1,0 +1,30 @@
+digraph G {
+    /* 1 STATES */
+    S_INIT [height=1 width=1 color="#1e8505" fontcolor="#1e8505"]
+    IDLE [height=1 width=1 color="#dda303" fontcolor="#dda303"]
+    SEEKING [height=1.5 width=1.5 color="#0076d6" fontcolor="#0076d6"]
+    CREATING [height=1.5 width=1.5 color="#0076d6" fontcolor="#0076d6"]
+    READING [height=1.5 width=1.5 color="#0076d6" fontcolor="#0076d6"]
+    UPDATING [height=1.5 width=1.5 color="#0076d6" fontcolor="#0076d6"]
+    DELETING [height=1.5 width=1.5 color="#0076d6" fontcolor="#0076d6"]
+    S_FINAL [height=1 width=1 color="#c52814" fontcolor="#c52814"]
+
+    /* 2 TRANSITIONS */
+    /* 2.1 Greeting and Leaving Transitions */
+    S_INIT -> IDLE [label="START" color="#1e8505" fontcolor="#1e8505"]
+    IDLE -> S_FINAL [label="END" color="#c52814" fontcolor="#c52814"]
+    
+    /* 2.2 Received Command Transitions */
+    IDLE -> SEEKING [label="SEEK" color="#0076d6" fontcolor="#0076d6"]
+    IDLE -> CREATING [label="CREATE" color="#0076d6" fontcolor="#0076d6"]
+    IDLE -> READING [label="READ" color="#0076d6" fontcolor="#0076d6"]
+    IDLE -> UPDATING [label="UPDATE" color="#0076d6" fontcolor="#0076d6"]
+    IDLE -> DELETING [label="DELETE" color="#0076d6" fontcolor="#0076d6"]
+
+    /* 2.3 Done Transitions */
+    SEEKING -> IDLE [label="DONE" color="#dda303" fontcolor="#dda303"]
+    CREATING -> IDLE [label="DONE" color="#dda303" fontcolor="#dda303"]
+    READING -> IDLE [label="DONE" color="#dda303" fontcolor="#dda303"]
+    UPDATING -> IDLE [label="DONE" color="#dda303" fontcolor="#dda303"]
+    DELETING -> IDLE [label="DONE" color="#dda303" fontcolor="#dda303"]
+}

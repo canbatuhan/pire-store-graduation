@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package pirestore;
+
+service PireKeyValueStore {
+    rpc Greet (Greeting) returns (WriteAck) {}
+    rpc Create (WriteRequest) returns (WriteAck) {}
+    rpc Read (ReadRequest) returns (ReadAck) {}
+    rpc Update (WriteRequest) returns (WriteAck) {}
+    rpc Delete (WriteRequest) returns (WriteAck) {}
+}
+
+message Greeting {
+    Address source = 10;
+    Address destination = 12;
+}
+
+message WriteRequest {
+    int32 id = 1;
+    int32 replica_no = 2;
+    string command = 3;
+    bytes key = 4;
+    bytes value = 5;
+    string encoding = 6;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message ReadRequest {
+    int32 id = 1;
+    string command = 3;
+    bytes key = 4;
+    string encoding = 6;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message WriteAck {
+    bool success = 1;
+    int32 ack_no = 2;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message ReadAck {
+    bool success = 1;
+    bytes value = 2;
+    string encoding = 3;
+    Address source = 10;
+    Address destination = 12;
+}
+
+message Address {
+    string host = 1;
+    int32 port = 2;
+}
