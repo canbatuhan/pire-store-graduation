@@ -1,0 +1,32 @@
+cluster:
+  max_replicas:    3
+  min_replicas:    1
+  discover_period: 2.0
+
+node:
+  neighbours:
+    - host: "192.168.1.121"
+      port: 8773
+    - host: "192.168.1.122"
+      port: 8773
+    - host: "192.168.1.123"
+      port: 8773
+    - host: "192.168.1.124"
+      port: 8773
+
+  statemachine: 
+    min_poll_time: 0.000000052
+    max_poll_time: 0.050000000
+
+  database:
+    path: "/home/racoon/pire/local.db"
+    min_poll_time: 0.025
+    max_poll_time: 8.0
+
+  communication:
+    host:     "192.168.1.120"
+    grpc_port: 8773
+    api_port:  8774
+  
+  n_workers: 10
+  encoding:  "utf-8"

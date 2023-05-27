@@ -1,0 +1,81 @@
+syntax = "proto3";
+
+package pirestore;
+
+service PireStore {
+    rpc Greet    (Greeting)              returns (Empty)    {}
+    rpc Discover (Discovery)             returns (Empty)    {}
+    rpc Create   (CreateProtocolMessage) returns (WriteAck) {}
+    rpc Read     (ReadProtocolMessage)   returns (ReadAck)  {}
+    rpc Update   (UpdateProtocolMessage) returns (WriteAck) {}
+    rpc Delete   (DeleteProtocolMessage) returns (WriteAck) {}
+}
+
+/* Main Messages */
+
+message Greeting {
+    Address sender = 1;
+}
+
+message Empty {
+    // Empty body
+}
+
+message Discovery {
+    repeated PairInfo deleted = 10;
+    repeated PairInfo created = 12;
+    Address           sender  = 14;
+}
+
+message CreateProtocolMessage {
+    WritePayload     payload  = 1;
+    bool             redirect = 2;
+    repeated Address created  = 10;
+}
+
+message UpdateProtocolMessage {
+    WritePayload payload  = 1;
+    Address      dest     = 10;
+}
+
+message DeleteProtocolMessage {
+    WritePayload payload  = 1;
+    Address      dest     = 10;
+}
+
+message WriteAck {
+    uint32 replica = 1;
+}
+
+message ReadProtocolMessage {
+    bytes            key      = 1;
+    string           encoding = 2;
+    Address          dest     = 10;
+}
+
+message ReadAck {
+    bool   success  = 1;
+    bytes  val      = 2;
+    string encoding = 3;
+}
+
+
+/* Helper Message Types */
+
+message Address {
+    string host = 1;
+    uint32 port = 2;
+}
+
+message PairInfo {
+    bytes   key   = 1;
+    uint32  hops  = 2;
+    Address owner = 10;
+}
+
+message WritePayload {
+    uint32           replica  = 1;
+    bytes            key      = 2;
+    bytes            val      = 3;
+    string           encoding = 4;
+}
