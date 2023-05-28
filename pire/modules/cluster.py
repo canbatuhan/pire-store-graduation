@@ -1,8 +1,9 @@
+from enum import Enum
 import random
 import grpc
 from typing import Dict, List, Tuple
 
-from pire.modules.discovery import DestinationInfo, DiscoveryItem
+from pire.modules.discovery import DiscoveryItem
 from pire.modules.service   import pirestore_pb2
 from pire.modules.service   import pirestore_pb2_grpc
 
@@ -107,11 +108,59 @@ class ClusterHandler:
 
     """ CREATE Protocol Implementation Starts """
 
-    def __call_Create(self) -> int:
-        pass
+    def __call_Create(self, request:pirestore_pb2.CreateProtocolMessage) -> int:
+        for _, stub in self.__stub_map.items():
+            try: # Try to send a message
+                response = stub.Create(request)
+                return response.replica
 
-    def create_protocol(self) -> Tuple[bool, int]:
-        pass
+            # Channel is broken or error in code
+            except Exception as exception:
+                print(exception.with_traceback())
+                return request.payload.replica 
+
+    def create_protocol(self, request:pirestore_pb2.CreateProtocolMessage) -> Tuple[bool, int]:
+        visited = [(each.host, each.port) for each in request.visited.vals]
+        
+        # Send a 'CREATE' request
+        random.shuffle(self.__neighbours)
+        request.direct = True # It is a direct request
+        for neigh_addr in self.__neighbours:
+            if neigh_addr not in visited:
+                ack = self.__call_Create(request)
+
+                # Some replicas are created
+                if ack > request.payload.replica:
+                    # Next replica to create
+                    request.payload.replica = ack # inplace!
+
+                    # Add to visited list
+                    visited.append(neigh_addr)
+                    request.visited.extend([pirestore_pb2.Address(
+                        host=neigh_addr[0], port=neigh_addr[1])]) # inplace!
+                    
+                    # Move the neighbour the back of the list
+                    self.__neighbours.remove(neigh_addr)
+                    self.__neighbours.append(neigh_addr)
+                    break
+
+        # Send 'CREATE_REDIRECT' requests
+        request.direct = False # It is a redirect request
+        if request.payload.replica < self.MIN_REPLICAS:
+            for neigh_addr in self.__neighbours:
+                ack = self.__call_Create(request)
+
+                # Some replicas are created
+                if ack > request.payload.replica: 
+                    # Next replica to create
+                    request.payload.replica = ack # inplace!
+
+                # All replicas are created
+                if request.payload.replica == self.MAX_REPLICAS:
+                    break
+
+        # Success criteria and the number of created replicas
+        return request.payload.replica <= self.MIN_REPLICAS, request.payload.replica
 
     """ CREATE Protocol Implementation Ends """
 

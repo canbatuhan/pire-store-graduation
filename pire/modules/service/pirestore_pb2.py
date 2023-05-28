@@ -19,95 +19,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\r\"G\n\x08PairInfo\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x0c\n\x04hops\x18\x02 \x01(\r\x12 \n\x04host\x18\n \x01(\x0b\x32\x12.pirestore.Address\"/\n\x08Greeting\x12#\n\x07\x61\x64\x64ress\x18\x01 \x01(\x0b\x32\x12.pirestore.Address\"\x07\n\x05\x45mpty\"|\n\tDiscovery\x12$\n\x07\x64\x65leted\x18\x01 \x03(\x0b\x32\x13.pirestore.PairInfo\x12$\n\x07\x63reated\x18\n \x03(\x0b\x32\x13.pirestore.PairInfo\x12#\n\x07\x61\x64\x64ress\x18\x0c \x01(\x0b\x32\x12.pirestore.Address\"\x9e\x01\n\x0cWriteRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\x0f\n\x07replica\x18\x02 \x01(\r\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x0b\n\x03val\x18\x04 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x05 \x01(\t\x12 \n\x04\x64\x65st\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12#\n\x07visited\x18\x0c \x03(\x0b\x32\x12.pirestore.Address\",\n\x08WriteAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0f\n\x07replica\x18\x02 \x01(\r\"\x7f\n\x0bReadRequest\x12\n\n\x02id\x18\x01 \x01(\r\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\x12 \n\x04\x64\x65st\x18\n \x01(\x0b\x32\x12.pirestore.Address\x12#\n\x07visited\x18\x0c \x03(\x0b\x32\x12.pirestore.Address\"9\n\x07ReadAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0b\n\x03val\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t2\xd7\x02\n\tPireStore\x12\x30\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x10.pirestore.Empty\"\x00\x12\x34\n\x08\x44iscover\x12\x14.pirestore.Discovery\x1a\x10.pirestore.Empty\"\x00\x12\x38\n\x06\x43reate\x12\x17.pirestore.WriteRequest\x1a\x13.pirestore.WriteAck\"\x00\x12\x34\n\x04Read\x12\x16.pirestore.ReadRequest\x1a\x12.pirestore.ReadAck\"\x00\x12\x38\n\x06Update\x12\x17.pirestore.WriteRequest\x1a\x13.pirestore.WriteAck\"\x00\x12\x38\n\x06\x44\x65lete\x12\x17.pirestore.WriteRequest\x1a\x13.pirestore.WriteAck\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\".\n\x08Greeting\x12\"\n\x06sender\x18\x01 \x01(\x0b\x32\x12.pirestore.Address\"\x07\n\x05\x45mpty\"{\n\tDiscovery\x12$\n\x07\x64\x65leted\x18\n \x03(\x0b\x32\x13.pirestore.PairInfo\x12$\n\x07\x63reated\x18\x0c \x03(\x0b\x32\x13.pirestore.PairInfo\x12\"\n\x06sender\x18\x0e \x01(\x0b\x32\x12.pirestore.Address\"x\n\x15\x43reateProtocolMessage\x12(\n\x07payload\x18\x01 \x01(\x0b\x32\x17.pirestore.WritePayload\x12\x10\n\x08redirect\x18\n \x01(\x08\x12#\n\x07visited\x18\x0e \x03(\x0b\x32\x12.pirestore.Address\"c\n\x15UpdateProtocolMessage\x12(\n\x07payload\x18\x01 \x01(\x0b\x32\x17.pirestore.WritePayload\x12 \n\x04\x64\x65st\x18\n \x01(\x0b\x32\x12.pirestore.Address\"c\n\x15\x44\x65leteProtocolMessage\x12(\n\x07payload\x18\x01 \x01(\x0b\x32\x17.pirestore.WritePayload\x12 \n\x04\x64\x65st\x18\n \x01(\x0b\x32\x12.pirestore.Address\"\x1b\n\x08WriteAck\x12\x0f\n\x07replica\x18\x01 \x01(\r\"V\n\x13ReadProtocolMessage\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x02 \x01(\t\x12 \n\x04\x64\x65st\x18\n \x01(\x0b\x32\x12.pirestore.Address\"9\n\x07ReadAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0b\n\x03val\x18\x02 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x03 \x01(\t\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\r\"H\n\x08PairInfo\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x0c\n\x04hops\x18\x02 \x01(\r\x12!\n\x05owner\x18\n \x01(\x0b\x32\x12.pirestore.Address\"K\n\x0cWritePayload\x12\x0f\n\x07replica\x18\x01 \x01(\r\x12\x0b\n\x03key\x18\x02 \x01(\x0c\x12\x0b\n\x03val\x18\x03 \x01(\x0c\x12\x10\n\x08\x65ncoding\x18\x04 \x01(\t2\xfa\x02\n\tPireStore\x12\x30\n\x05Greet\x12\x13.pirestore.Greeting\x1a\x10.pirestore.Empty\"\x00\x12\x34\n\x08\x44iscover\x12\x14.pirestore.Discovery\x1a\x10.pirestore.Empty\"\x00\x12\x41\n\x06\x43reate\x12 .pirestore.CreateProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12<\n\x04Read\x12\x1e.pirestore.ReadProtocolMessage\x1a\x12.pirestore.ReadAck\"\x00\x12\x41\n\x06Update\x12 .pirestore.UpdateProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12\x41\n\x06\x44\x65lete\x12 .pirestore.DeleteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x62\x06proto3'
 )
 
 
-
-
-_ADDRESS = _descriptor.Descriptor(
-  name='Address',
-  full_name='pirestore.Address',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='host', full_name='pirestore.Address.host', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='port', full_name='pirestore.Address.port', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=30,
-  serialized_end=67,
-)
-
-
-_PAIRINFO = _descriptor.Descriptor(
-  name='PairInfo',
-  full_name='pirestore.PairInfo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='pirestore.PairInfo.key', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='hops', full_name='pirestore.PairInfo.hops', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='host', full_name='pirestore.PairInfo.host', index=2,
-      number=10, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=69,
-  serialized_end=140,
-)
 
 
 _GREETING = _descriptor.Descriptor(
@@ -119,7 +34,7 @@ _GREETING = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='address', full_name='pirestore.Greeting.address', index=0,
+      name='sender', full_name='pirestore.Greeting.sender', index=0,
       number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -137,8 +52,8 @@ _GREETING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=142,
-  serialized_end=189,
+  serialized_start=30,
+  serialized_end=76,
 )
 
 
@@ -162,8 +77,8 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=191,
-  serialized_end=198,
+  serialized_start=78,
+  serialized_end=85,
 )
 
 
@@ -177,21 +92,21 @@ _DISCOVERY = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='deleted', full_name='pirestore.Discovery.deleted', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='created', full_name='pirestore.Discovery.created', index=1,
       number=10, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='address', full_name='pirestore.Discovery.address', index=2,
-      number=12, type=11, cpp_type=10, label=1,
+      name='created', full_name='pirestore.Discovery.created', index=1,
+      number=12, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='sender', full_name='pirestore.Discovery.sender', index=2,
+      number=14, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -208,64 +123,36 @@ _DISCOVERY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=200,
-  serialized_end=324,
+  serialized_start=87,
+  serialized_end=210,
 )
 
 
-_WRITEREQUEST = _descriptor.Descriptor(
-  name='WriteRequest',
-  full_name='pirestore.WriteRequest',
+_CREATEPROTOCOLMESSAGE = _descriptor.Descriptor(
+  name='CreateProtocolMessage',
+  full_name='pirestore.CreateProtocolMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='pirestore.WriteRequest.id', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='replica', full_name='pirestore.WriteRequest.replica', index=1,
-      number=2, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='key', full_name='pirestore.WriteRequest.key', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='val', full_name='pirestore.WriteRequest.val', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='encoding', full_name='pirestore.WriteRequest.encoding', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='dest', full_name='pirestore.WriteRequest.dest', index=5,
-      number=10, type=11, cpp_type=10, label=1,
+      name='payload', full_name='pirestore.CreateProtocolMessage.payload', index=0,
+      number=1, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='visited', full_name='pirestore.WriteRequest.visited', index=6,
-      number=12, type=11, cpp_type=10, label=3,
+      name='redirect', full_name='pirestore.CreateProtocolMessage.redirect', index=1,
+      number=10, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='visited', full_name='pirestore.CreateProtocolMessage.visited', index=2,
+      number=14, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -282,8 +169,86 @@ _WRITEREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=327,
-  serialized_end=485,
+  serialized_start=212,
+  serialized_end=332,
+)
+
+
+_UPDATEPROTOCOLMESSAGE = _descriptor.Descriptor(
+  name='UpdateProtocolMessage',
+  full_name='pirestore.UpdateProtocolMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='payload', full_name='pirestore.UpdateProtocolMessage.payload', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dest', full_name='pirestore.UpdateProtocolMessage.dest', index=1,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=334,
+  serialized_end=433,
+)
+
+
+_DELETEPROTOCOLMESSAGE = _descriptor.Descriptor(
+  name='DeleteProtocolMessage',
+  full_name='pirestore.DeleteProtocolMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='payload', full_name='pirestore.DeleteProtocolMessage.payload', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='dest', full_name='pirestore.DeleteProtocolMessage.dest', index=1,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=435,
+  serialized_end=534,
 )
 
 
@@ -296,15 +261,8 @@ _WRITEACK = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='pirestore.WriteAck.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='replica', full_name='pirestore.WriteAck.replica', index=1,
-      number=2, type=13, cpp_type=3, label=1,
+      name='replica', full_name='pirestore.WriteAck.replica', index=0,
+      number=1, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -321,51 +279,37 @@ _WRITEACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=487,
-  serialized_end=531,
+  serialized_start=536,
+  serialized_end=563,
 )
 
 
-_READREQUEST = _descriptor.Descriptor(
-  name='ReadRequest',
-  full_name='pirestore.ReadRequest',
+_READPROTOCOLMESSAGE = _descriptor.Descriptor(
+  name='ReadProtocolMessage',
+  full_name='pirestore.ReadProtocolMessage',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='pirestore.ReadRequest.id', index=0,
-      number=1, type=13, cpp_type=3, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='key', full_name='pirestore.ReadRequest.key', index=1,
-      number=2, type=12, cpp_type=9, label=1,
+      name='key', full_name='pirestore.ReadProtocolMessage.key', index=0,
+      number=1, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='encoding', full_name='pirestore.ReadRequest.encoding', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      name='encoding', full_name='pirestore.ReadProtocolMessage.encoding', index=1,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='dest', full_name='pirestore.ReadRequest.dest', index=3,
+      name='dest', full_name='pirestore.ReadProtocolMessage.dest', index=2,
       number=10, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='visited', full_name='pirestore.ReadRequest.visited', index=4,
-      number=12, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -381,8 +325,8 @@ _READREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=533,
-  serialized_end=660,
+  serialized_start=565,
+  serialized_end=651,
 )
 
 
@@ -427,43 +371,173 @@ _READACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=662,
-  serialized_end=719,
+  serialized_start=653,
+  serialized_end=710,
 )
 
-_PAIRINFO.fields_by_name['host'].message_type = _ADDRESS
-_GREETING.fields_by_name['address'].message_type = _ADDRESS
+
+_ADDRESS = _descriptor.Descriptor(
+  name='Address',
+  full_name='pirestore.Address',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='host', full_name='pirestore.Address.host', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='port', full_name='pirestore.Address.port', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=712,
+  serialized_end=749,
+)
+
+
+_PAIRINFO = _descriptor.Descriptor(
+  name='PairInfo',
+  full_name='pirestore.PairInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='pirestore.PairInfo.key', index=0,
+      number=1, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='hops', full_name='pirestore.PairInfo.hops', index=1,
+      number=2, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='owner', full_name='pirestore.PairInfo.owner', index=2,
+      number=10, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=751,
+  serialized_end=823,
+)
+
+
+_WRITEPAYLOAD = _descriptor.Descriptor(
+  name='WritePayload',
+  full_name='pirestore.WritePayload',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='replica', full_name='pirestore.WritePayload.replica', index=0,
+      number=1, type=13, cpp_type=3, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='key', full_name='pirestore.WritePayload.key', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='val', full_name='pirestore.WritePayload.val', index=2,
+      number=3, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='encoding', full_name='pirestore.WritePayload.encoding', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=825,
+  serialized_end=900,
+)
+
+_GREETING.fields_by_name['sender'].message_type = _ADDRESS
 _DISCOVERY.fields_by_name['deleted'].message_type = _PAIRINFO
 _DISCOVERY.fields_by_name['created'].message_type = _PAIRINFO
-_DISCOVERY.fields_by_name['address'].message_type = _ADDRESS
-_WRITEREQUEST.fields_by_name['dest'].message_type = _ADDRESS
-_WRITEREQUEST.fields_by_name['visited'].message_type = _ADDRESS
-_READREQUEST.fields_by_name['dest'].message_type = _ADDRESS
-_READREQUEST.fields_by_name['visited'].message_type = _ADDRESS
-DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
-DESCRIPTOR.message_types_by_name['PairInfo'] = _PAIRINFO
+_DISCOVERY.fields_by_name['sender'].message_type = _ADDRESS
+_CREATEPROTOCOLMESSAGE.fields_by_name['payload'].message_type = _WRITEPAYLOAD
+_CREATEPROTOCOLMESSAGE.fields_by_name['visited'].message_type = _ADDRESS
+_UPDATEPROTOCOLMESSAGE.fields_by_name['payload'].message_type = _WRITEPAYLOAD
+_UPDATEPROTOCOLMESSAGE.fields_by_name['dest'].message_type = _ADDRESS
+_DELETEPROTOCOLMESSAGE.fields_by_name['payload'].message_type = _WRITEPAYLOAD
+_DELETEPROTOCOLMESSAGE.fields_by_name['dest'].message_type = _ADDRESS
+_READPROTOCOLMESSAGE.fields_by_name['dest'].message_type = _ADDRESS
+_PAIRINFO.fields_by_name['owner'].message_type = _ADDRESS
 DESCRIPTOR.message_types_by_name['Greeting'] = _GREETING
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 DESCRIPTOR.message_types_by_name['Discovery'] = _DISCOVERY
-DESCRIPTOR.message_types_by_name['WriteRequest'] = _WRITEREQUEST
+DESCRIPTOR.message_types_by_name['CreateProtocolMessage'] = _CREATEPROTOCOLMESSAGE
+DESCRIPTOR.message_types_by_name['UpdateProtocolMessage'] = _UPDATEPROTOCOLMESSAGE
+DESCRIPTOR.message_types_by_name['DeleteProtocolMessage'] = _DELETEPROTOCOLMESSAGE
 DESCRIPTOR.message_types_by_name['WriteAck'] = _WRITEACK
-DESCRIPTOR.message_types_by_name['ReadRequest'] = _READREQUEST
+DESCRIPTOR.message_types_by_name['ReadProtocolMessage'] = _READPROTOCOLMESSAGE
 DESCRIPTOR.message_types_by_name['ReadAck'] = _READACK
+DESCRIPTOR.message_types_by_name['Address'] = _ADDRESS
+DESCRIPTOR.message_types_by_name['PairInfo'] = _PAIRINFO
+DESCRIPTOR.message_types_by_name['WritePayload'] = _WRITEPAYLOAD
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,), {
-  'DESCRIPTOR' : _ADDRESS,
-  '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.Address)
-  })
-_sym_db.RegisterMessage(Address)
-
-PairInfo = _reflection.GeneratedProtocolMessageType('PairInfo', (_message.Message,), {
-  'DESCRIPTOR' : _PAIRINFO,
-  '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.PairInfo)
-  })
-_sym_db.RegisterMessage(PairInfo)
 
 Greeting = _reflection.GeneratedProtocolMessageType('Greeting', (_message.Message,), {
   'DESCRIPTOR' : _GREETING,
@@ -486,12 +560,26 @@ Discovery = _reflection.GeneratedProtocolMessageType('Discovery', (_message.Mess
   })
 _sym_db.RegisterMessage(Discovery)
 
-WriteRequest = _reflection.GeneratedProtocolMessageType('WriteRequest', (_message.Message,), {
-  'DESCRIPTOR' : _WRITEREQUEST,
+CreateProtocolMessage = _reflection.GeneratedProtocolMessageType('CreateProtocolMessage', (_message.Message,), {
+  'DESCRIPTOR' : _CREATEPROTOCOLMESSAGE,
   '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.WriteRequest)
+  # @@protoc_insertion_point(class_scope:pirestore.CreateProtocolMessage)
   })
-_sym_db.RegisterMessage(WriteRequest)
+_sym_db.RegisterMessage(CreateProtocolMessage)
+
+UpdateProtocolMessage = _reflection.GeneratedProtocolMessageType('UpdateProtocolMessage', (_message.Message,), {
+  'DESCRIPTOR' : _UPDATEPROTOCOLMESSAGE,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.UpdateProtocolMessage)
+  })
+_sym_db.RegisterMessage(UpdateProtocolMessage)
+
+DeleteProtocolMessage = _reflection.GeneratedProtocolMessageType('DeleteProtocolMessage', (_message.Message,), {
+  'DESCRIPTOR' : _DELETEPROTOCOLMESSAGE,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.DeleteProtocolMessage)
+  })
+_sym_db.RegisterMessage(DeleteProtocolMessage)
 
 WriteAck = _reflection.GeneratedProtocolMessageType('WriteAck', (_message.Message,), {
   'DESCRIPTOR' : _WRITEACK,
@@ -500,12 +588,12 @@ WriteAck = _reflection.GeneratedProtocolMessageType('WriteAck', (_message.Messag
   })
 _sym_db.RegisterMessage(WriteAck)
 
-ReadRequest = _reflection.GeneratedProtocolMessageType('ReadRequest', (_message.Message,), {
-  'DESCRIPTOR' : _READREQUEST,
+ReadProtocolMessage = _reflection.GeneratedProtocolMessageType('ReadProtocolMessage', (_message.Message,), {
+  'DESCRIPTOR' : _READPROTOCOLMESSAGE,
   '__module__' : 'pirestore_pb2'
-  # @@protoc_insertion_point(class_scope:pirestore.ReadRequest)
+  # @@protoc_insertion_point(class_scope:pirestore.ReadProtocolMessage)
   })
-_sym_db.RegisterMessage(ReadRequest)
+_sym_db.RegisterMessage(ReadProtocolMessage)
 
 ReadAck = _reflection.GeneratedProtocolMessageType('ReadAck', (_message.Message,), {
   'DESCRIPTOR' : _READACK,
@@ -513,6 +601,27 @@ ReadAck = _reflection.GeneratedProtocolMessageType('ReadAck', (_message.Message,
   # @@protoc_insertion_point(class_scope:pirestore.ReadAck)
   })
 _sym_db.RegisterMessage(ReadAck)
+
+Address = _reflection.GeneratedProtocolMessageType('Address', (_message.Message,), {
+  'DESCRIPTOR' : _ADDRESS,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.Address)
+  })
+_sym_db.RegisterMessage(Address)
+
+PairInfo = _reflection.GeneratedProtocolMessageType('PairInfo', (_message.Message,), {
+  'DESCRIPTOR' : _PAIRINFO,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.PairInfo)
+  })
+_sym_db.RegisterMessage(PairInfo)
+
+WritePayload = _reflection.GeneratedProtocolMessageType('WritePayload', (_message.Message,), {
+  'DESCRIPTOR' : _WRITEPAYLOAD,
+  '__module__' : 'pirestore_pb2'
+  # @@protoc_insertion_point(class_scope:pirestore.WritePayload)
+  })
+_sym_db.RegisterMessage(WritePayload)
 
 
 
@@ -523,8 +632,8 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=722,
-  serialized_end=1065,
+  serialized_start=903,
+  serialized_end=1281,
   methods=[
   _descriptor.MethodDescriptor(
     name='Greet',
@@ -551,7 +660,7 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireStore.Create',
     index=2,
     containing_service=None,
-    input_type=_WRITEREQUEST,
+    input_type=_CREATEPROTOCOLMESSAGE,
     output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -561,7 +670,7 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireStore.Read',
     index=3,
     containing_service=None,
-    input_type=_READREQUEST,
+    input_type=_READPROTOCOLMESSAGE,
     output_type=_READACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -571,7 +680,7 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireStore.Update',
     index=4,
     containing_service=None,
-    input_type=_WRITEREQUEST,
+    input_type=_UPDATEPROTOCOLMESSAGE,
     output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -581,7 +690,7 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
     full_name='pirestore.PireStore.Delete',
     index=5,
     containing_service=None,
-    input_type=_WRITEREQUEST,
+    input_type=_DELETEPROTOCOLMESSAGE,
     output_type=_WRITEACK,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

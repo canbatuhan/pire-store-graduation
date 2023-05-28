@@ -80,26 +80,26 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
         return pirestore_pb2.Empty()
     
     def Create(self, request, context):
-        replica = request.replica
-
         try: # Try to execute
-            self.create_statemachine_if_not_exists(request.key)
-            self.statemachine_map.get(request.key).poll(Event.WRITE)
-            self.statemachine_map.get(request.key).trigger(Event.WRITE)
+            self.create_statemachine_if_not_exists(request.payload.key)
+            self.statemachine_map.get(request.payload.key).poll(Event.WRITE)
+            self.statemachine_map.get(request.payload.key).trigger(Event.WRITE)
 
-            # Direct request
-            if not request.redirect:
+            # Received 'CREATE' request
+            if request.direct:
                 success = self.database.create(
                     request.payload.key.decode(request.encoding),
                     request.payload.val.decode(request.encoding))
             
                 if success: # Created locally
-                    replica += 1
+                    request.payload.replica += 1 # inplace!
 
-            else: # Redirect request
+            else: # Received 'CREATE_REDIRECT' request
                 _, ack = self.cluster_handler.create_protocol(request)
-                if ack > replica: # Some pairs are created
-                    replica = ack
+
+                # Some pairs are created
+                if ack > request.payload.replica:
+                    request.payload.replica = ack # inplace!
 
             self.statemachine_map.get(request.payload.key).trigger(Event.DONE)
 
@@ -107,7 +107,7 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
             pass # Could not trigger state machine
         
         # Send acknowledgment
-        return pirestore_pb2.WriteAck(replica=replica)
+        return pirestore_pb2.WriteAck(replica=request.payload.replica)
     
     def Read(self, request, context):
         return super().Read(request, context)

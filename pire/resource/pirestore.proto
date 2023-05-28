@@ -28,9 +28,9 @@ message Discovery {
 }
 
 message CreateProtocolMessage {
-    WritePayload     payload  = 1;
-    bool             redirect = 2;
-    repeated Address created  = 10;
+    WritePayload     payload = 1;
+    bool             direct  = 10;
+    repeated Address visited = 14;
 }
 
 message UpdateProtocolMessage {
