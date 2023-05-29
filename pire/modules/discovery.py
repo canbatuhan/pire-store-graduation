@@ -4,7 +4,7 @@ from typing import Tuple, List
 MAX_HOPS = 9999999
 
 class DestinationInfo:
-    def __init__(self, owner, next:Tuple[str,int], hops:int) -> None:
+    def __init__(self, owner:Tuple[str,int], next:Tuple[str,int], hops:int) -> None:
         self.owner = owner
         self.next  = next
         self.hops   = hops
@@ -14,14 +14,14 @@ class DiscoveryItem:
         self.__destinations:List[DestinationInfo] = dict()
         self.__best_indexes:List[int] = list()
     
-    def __get_item(self, owner:Tuple[str,int]) -> Tuple[int,DestinationInfo]:
+    def get_item(self, owner:Tuple[str,int]) -> Tuple[int,DestinationInfo]:
         for idx, each in enumerate(self.__destinations):
             if each.owner == owner:
                 return idx, owner
         return -1, None
     
     def __exists(self, owner:Tuple[str,int]) -> bool:
-        return self.__get_item(owner)[1] != None
+        return self.get_item(owner)[1] != None
     
     def __set_best(self) -> None:
         min_hops = MAX_HOPS
@@ -52,7 +52,7 @@ class DiscoveryItem:
                 DestinationInfo(owner, next, hops))
 
         else: # Destination exists, might not set
-            idx, dest_info = self.__get_item(owner)
+            idx, dest_info = self.get_item(owner)
 
             # Better path, set
             if hops < dest_info.hops:
@@ -68,7 +68,7 @@ class DiscoveryItem:
     def delete_destination(self, owner) -> Tuple[bool,int]:
         # Destination exists, delete
         if self.__exists(owner):
-            _, idx = self.__get_item(owner)
+            _, idx = self.get_item(owner)
             self.__destinations.pop(idx)
             self.__set_best()
             return True, len(self.__destinations)

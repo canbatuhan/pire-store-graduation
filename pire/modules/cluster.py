@@ -7,6 +7,8 @@ from pire.modules.discovery import DiscoveryItem
 from pire.modules.service   import pirestore_pb2
 from pire.modules.service   import pirestore_pb2_grpc
 
+NULL_DESTINATION_HOST = "xxx.xxx.xxx.xxx"
+
 class ClusterHandler:
     MAX_REPLICAS = int()
     MIN_REPLICAS = int()
@@ -17,10 +19,51 @@ class ClusterHandler:
         self.__neighbours = neighbours
         self.__stub_map:Dict[Tuple[str,int], pirestore_pb2_grpc.PireStoreStub] = dict()
         self.__discovery_map:Dict[bytes, DiscoveryItem]                        = dict()
-        self.__created:List[pirestore_pb2.PairInfo] = list()
-        self.__deleted:List[pirestore_pb2.PairInfo] = list()
+        self.__newly_created:List[pirestore_pb2.PairInfo] = list()
+        self.__newly_deleted:List[pirestore_pb2.PairInfo] = list()
         self.MAX_REPLICAS = max_replicas
         self.MIN_REPLICAS = min_replicas
+
+    def get_address(self) -> Tuple[str,int]:
+        return (self.__host, self.__port)
+    
+    def add_to_created(self, key:bytes, owner:Tuple[str,int]=None, next:Tuple[str,int]=None, hops:int=0) -> None:
+        discovery_item = self.__discovery_map.get(key)
+
+        # First hearing of the key
+        if discovery_item == None:
+            self.__discovery_map[key] = DiscoveryItem()
+
+        # Owner is 'self'
+        if owner == None:
+            owner = (self.__host, self.__port)
+
+        is_set = self.__discovery_map[key].set_destination(owner, next, hops)
+        if is_set: # Set in the discovery map
+            owner_addr_grpc = pirestore_pb2.Address(
+                    host=owner[0], port=owner[1])
+            self.__newly_created.append(pirestore_pb2.PairInfo(
+                    key=key, owner=owner_addr_grpc, hops=hops))
+
+    def add_to_deleted(self, key:bytes, owner:Tuple[str,int]=None, next:Tuple[str,int]=None, hops:int=0) -> None:
+        discovery_item = self.__discovery_map.get(key)
+
+        # First hearing of the key
+        if discovery_item != None:
+
+            # Owner is 'self'
+            if owner == None:
+                owner = (self.__host, self.__port)
+
+            is_deleted, remaining = self.__discovery_map[key].delete_destination(owner)
+            if is_deleted: # Deleted from the discovery map
+                owner_addr_grpc = pirestore_pb2.Address(
+                        host=owner[0], host=owner[1])
+                self.__newly_deleted.append(pirestore_pb2.PairInfo(
+                        key=key, owner=owner_addr_grpc, hops=hops))
+                
+            if remaining == 0:
+                self.__discovery_map.pop(key)
 
     """ GREET Protocol Implementation Starts """
 
@@ -50,13 +93,13 @@ class ClusterHandler:
                 
                 # Call gRPC Service "Discovery"
                 grpc_discovery = pirestore_pb2.Discovery(address=addr_grpc)
-                grpc_discovery.created.extend(self.__created)
-                grpc_discovery.deleted.extend(self.__deleted)
+                grpc_discovery.created.extend(self.__newly_created)
+                grpc_discovery.deleted.extend(self.__newly_deleted)
                 _ = stub.Greet(grpc_discovery)
 
                 # Clear waiting discovery messages
-                self.__created.clear()
-                self.__deleted.clear()
+                self.__newly_created.clear()
+                self.__newly_deleted.clear()
                 
             except Exception as exception:
                 print(exception.with_traceback())
@@ -65,42 +108,17 @@ class ClusterHandler:
     def discover_protocol_receiver(self, next_addr:Tuple[str,int], created:List[pirestore_pb2.PairInfo], deleted:List[pirestore_pb2.PairInfo]) -> None:
         # Process created pairs
         for pair_info in created:
-            owner_addr     = (pair_info.owner.host, pair_info.owner.port)
             key            = pair_info.key
+            owner_addr     = (pair_info.owner.host, pair_info.owner.port)
             hops           = pair_info.hops
-            discovery_item = self.__discovery_map.get(key)
-
-            # First hearing of the key
-            if discovery_item == None:
-                self.__discovery_map[key] = DiscoveryItem()
-
-            # Try to set
-            is_set = self.__discovery_map[key].set_destination(owner_addr, next_addr, hops+1)
-            if is_set: # Destinations are updated
-                owner_addr_grpc = pirestore_pb2.Address(
-                    host=pair_info.owner.host, port=pair_info.owner.port)
-                self.__created.append(pirestore_pb2.PairInfo(
-                    key=key, owner=owner_addr_grpc, hops=hops+1))
+            self.add_to_created(key, owner_addr, next_addr, hops+1)
 
         # Process deleted pairs
         for pair_info in deleted:
             owner_addr     = (pair_info.owner.host, pair_info.owner.port)
             key            = pair_info.key
             hops           = pair_info.hops
-            discovery_item = self.__discovery_map.get(key)
-
-            # Pair exists
-            if discovery_item != None:
-                is_deleted, remaining = self.__discovery_map[key].delete_destination(owner_addr)
-                if is_deleted: # Destinations are updated
-                    owner_addr_grpc = pirestore_pb2.Address(
-                        host=pair_info.owner.host, port=pair_info.owner.port)
-                    self.__deleted.append(pirestore_pb2.PairInfo(
-                        key=key, owner=owner_addr_grpc, hops=hops+1))
-                    
-                # All possible destinations are deleted
-                if remaining == 0:
-                    self.__discovery_map.pop(key)
+            self.add_to_deleted(key, owner_addr, next_addr, hops+1)
 
 
     """ DISCOVER Protocol Implementation Ends """
@@ -108,18 +126,18 @@ class ClusterHandler:
 
     """ CREATE Protocol Implementation Starts """
 
-    def __call_Create(self, request:pirestore_pb2.CreateProtocolMessage) -> int:
-        for _, stub in self.__stub_map.items():
-            try: # Try to send a message
-                response = stub.Create(request)
-                return response.replica
+    def __call_Create(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.CreateProtocolMessage) -> int:
+        try: # Try to send a message
+            stub = self.__stub_map.get(neigh_addr)
+            response = stub.Create(request)
+            return response.replica
+        
+        # Channel is broken or error in code
+        except Exception as exception:
+            print(exception.with_traceback())
+            return request.payload.replica 
 
-            # Channel is broken or error in code
-            except Exception as exception:
-                print(exception.with_traceback())
-                return request.payload.replica 
-
-    def create_protocol(self, request:pirestore_pb2.CreateProtocolMessage) -> Tuple[bool, int]:
+    def create_protocol(self, request:pirestore_pb2.CreateProtocolMessage) -> Tuple[bool,int]:
         visited = [(each.host, each.port) for each in request.visited.vals]
         
         # Send a 'CREATE' request
@@ -127,7 +145,7 @@ class ClusterHandler:
         request.direct = True # It is a direct request
         for neigh_addr in self.__neighbours:
             if neigh_addr not in visited:
-                ack = self.__call_Create(request)
+                ack = self.__call_Create(neigh_addr, request)
 
                 # Some replicas are created
                 if ack > request.payload.replica:
@@ -148,7 +166,7 @@ class ClusterHandler:
         request.direct = False # It is a redirect request
         if request.payload.replica < self.MIN_REPLICAS:
             for neigh_addr in self.__neighbours:
-                ack = self.__call_Create(request)
+                ack = self.__call_Create(neigh_addr, request)
 
                 # Some replicas are created
                 if ack > request.payload.replica: 
@@ -167,11 +185,39 @@ class ClusterHandler:
 
     """ READ Protocol Implementation Starts """
 
-    def __call_Read(self) -> int:
-        pass
+    def __call_Read(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,int]:
+        try: # Try to send a message
+            stub = self.__stub_map.get(neigh_addr)
+            response = stub.Read(request)
+            return True, response.val
+        
+        # Channel is broken or error in code
+        except Exception as exception:
+            print(exception.with_traceback())
+            return False, None
 
-    def read_protocol(self) -> Tuple[bool, int]:
-        pass
+    def read_protocol(self, request) -> Tuple[bool,int]:
+        success = False
+        value   = None
+
+        discovery_item = self.__discovery_map.get(request.key)
+        if discovery_item != None: # Key's location is known
+            _, destination_item = discovery_item.get_item((request.dest.host, request.dest.port))
+
+            if destination_item != None: # Destination found in the discovery map
+                next_addr = destination_item.next
+
+            else: # Destination not found in the discovery map
+                next_addr = discovery_item.get_best_next()
+                
+            success, value = self.__call_Read(next_addr, request)
+
+        else: # Key's location is not known
+            for (host, port) in self.__neighbours:
+                request.dest.host = NULL_DESTINATION_HOST
+                success, value = self.__call_Read((host, port), request)
+
+        return success, value
 
     """ READ Protocol Implementation Ends """
 

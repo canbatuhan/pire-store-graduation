@@ -4,7 +4,7 @@ import grpc
 import yaml
 from concurrent import futures
 
-from pire.modules.cluster      import ClusterHandler
+from pire.modules.cluster      import NULL_DESTINATION_HOST, ClusterHandler
 from pire.modules.statemachine import ReplicatedStateMachine
 from pire.modules.database     import LocalDatabase
 from pire.modules.service      import pirestore_pb2
@@ -74,9 +74,9 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
         return pirestore_pb2.Empty()
     
     def Discover(self, request, context):
-        next_addr = (request.sender.host, request.sender.port)
+        neigh_addr = (request.sender.host, request.sender.port)
         self.cluster_handler.discover_protocol_receiver(
-            next_addr, request.created.vals, request.deleted.vals)
+            neigh_addr, request.created.vals, request.deleted.vals)
         return pirestore_pb2.Empty()
     
     def Create(self, request, context):
@@ -93,6 +93,7 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
             
                 if success: # Created locally
                     request.payload.replica += 1 # inplace!
+                    self.cluster_handler.add_to_created(request.payload.key)
 
             else: # Received 'CREATE_REDIRECT' request
                 _, ack = self.cluster_handler.create_protocol(request)
@@ -110,7 +111,34 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
         return pirestore_pb2.WriteAck(replica=request.payload.replica)
     
     def Read(self, request, context):
-        return super().Read(request, context)
+        success = False
+        value   = None
+
+        try: # Try to execute
+
+            # Handle the request
+            self.create_statemachine_if_not_exists(request.key)
+            self.statemachine_map.get(request.key).poll(Event.READ)
+            self.statemachine_map.get(request.key).trigger(Event.READ)
+
+            # Read from the local database
+            if (request.dest.host, request.dest.port) == self.cluster_handler.get_address():
+                success, value = self.database.read(request.key.decode(request.encoding))
+
+            elif request.dest.host == NULL_DESTINATION_HOST: # Null destination
+                success, value = self.database.read(request.key.decode(request.encoding))
+                if not success: # Could not read from the local database
+                    success, value = self.cluster_handler.read_protocol(request)
+            
+            else: # Redirect request
+                success, value = self.cluster_handler.read_protocol(request)
+
+            self.statemachine_map.get(request.key).trigger(Event.DONE)
+
+        except PollingTimeoutException:
+            pass # Could not trigger state machine
+
+        return pirestore_pb2.ReadAck(success=success, val=value, encoding=request.encoding)
     
     def Update(self, request, context):
         return super().Update(request, context)
