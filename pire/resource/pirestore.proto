@@ -30,17 +30,17 @@ message Discovery {
 message CreateProtocolMessage {
     WritePayload     payload = 1;
     bool             direct  = 10;
-    repeated Address visited = 14;
+    repeated Address visited = 12;
 }
 
 message UpdateProtocolMessage {
-    WritePayload payload  = 1;
-    Address      dest     = 10;
+    WritePayload     payload = 1;
+    repeated Address dests   = 10;
 }
 
 message DeleteProtocolMessage {
-    WritePayload payload  = 1;
-    Address      dest     = 10;
+    WritePayload     payload = 1;
+    repeated Address dests   = 10;
 }
 
 message WriteAck {
@@ -48,9 +48,8 @@ message WriteAck {
 }
 
 message ReadProtocolMessage {
-    bytes            key      = 1;
-    string           encoding = 2;
-    Address          dest     = 10;
+    ReadPayload payload = 1;
+    Address     dest    = 10;
 }
 
 message ReadAck {
@@ -74,8 +73,15 @@ message PairInfo {
 }
 
 message WritePayload {
-    uint32           replica  = 1;
-    bytes            key      = 2;
-    bytes            val      = 3;
-    string           encoding = 4;
+    uint32 replica  = 1;
+    bool   blind    = 2;
+    bytes  key      = 3;
+    bytes  val      = 4;
+    string encoding = 5;
+}
+
+message ReadPayload {
+    bool    blind    = 1;
+    bytes   key      = 2;
+    string  encoding = 3;
 }

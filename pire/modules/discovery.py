@@ -4,21 +4,15 @@ from typing import Tuple, List
 MAX_HOPS = 9999999
 
 class DestinationInfo:
-    def __init__(self, owner:Tuple[str,int], next:Tuple[str,int], hops:int) -> None:
+    def __init__(self, owner:Tuple[str,int], nexts:List[Tuple[str,int]], hops:int) -> None:
         self.owner = owner
-        self.next  = next
-        self.hops   = hops
+        self.nexts = nexts
+        self.hops  = hops
 
 class DiscoveryItem:
     def __init__(self) -> None:
         self.__destinations:List[DestinationInfo] = dict()
         self.__best_indexes:List[int] = list()
-    
-    def get_item(self, owner:Tuple[str,int]) -> Tuple[int,DestinationInfo]:
-        for idx, each in enumerate(self.__destinations):
-            if each.owner == owner:
-                return idx, owner
-        return -1, None
     
     def __exists(self, owner:Tuple[str,int]) -> bool:
         return self.get_item(owner)[1] != None
@@ -27,17 +21,24 @@ class DiscoveryItem:
         min_hops = MAX_HOPS
         self.__best_indexes.clear()
         for each in self.__destinations:
-            if each.hops < min_hops:
-                self.__best_indexes.clear()
-                self.__best_indexes.append(each)
-            elif each.hops == min_hops:
-                self.__best_indexes.append(each)
+            if each.hops != 0:
+                if each.hops < min_hops:
+                    self.__best_indexes.clear()
+                    self.__best_indexes.append(each)
+                elif each.hops == min_hops:
+                    self.__best_indexes.append(each)
+
+    def get_item(self, owner:Tuple[str,int]) -> Tuple[int,DestinationInfo]:
+        for idx, each in enumerate(self.__destinations):
+            if each.owner == owner:
+                return idx, each
+        return -1, None
 
     def get_destinations(self) -> List[DestinationInfo]:
         return self.__destinations
     
-    def get_best_next(self) -> Tuple[str,int]:
-        return self.__destinations[random.choice(self.__best_indexes)].next
+    def get_best_destination(self) -> DestinationInfo:
+        return self.__destinations[random.choice(self.__best_indexes)]
     
     def set_destination(self, owner:Tuple[str,int], next:Tuple[str,int], hops:int) -> bool:
 
@@ -56,7 +57,10 @@ class DiscoveryItem:
 
             # Better path, set
             if hops < dest_info.hops:
-                self.__destinations[idx] = DestinationInfo(owner, next, hops)
+                self.__destinations[idx] = DestinationInfo(owner, [next], hops)
+
+            elif hops == dest_info.hops and next not in dest_info.nexts:
+                self.__destinations[idx].nexts.append(next)
 
             else: # Not better, do not set
                 return False

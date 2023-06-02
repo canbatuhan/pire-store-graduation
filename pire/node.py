@@ -88,8 +88,8 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
             # Received 'CREATE' request
             if request.direct:
                 success = self.database.create(
-                    request.payload.key.decode(request.encoding),
-                    request.payload.val.decode(request.encoding))
+                    request.payload.key.decode(request.payload.encoding),
+                    request.payload.val.decode(request.payload.encoding))
             
                 if success: # Created locally
                     request.payload.replica += 1 # inplace!
@@ -115,33 +115,84 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
         value   = None
 
         try: # Try to execute
+            self.create_statemachine_if_not_exists(request.payload.key)
+            self.statemachine_map.get(request.payload.key).poll(Event.READ)
+            self.statemachine_map.get(request.payload.key).trigger(Event.READ)
 
-            # Handle the request
-            self.create_statemachine_if_not_exists(request.key)
-            self.statemachine_map.get(request.key).poll(Event.READ)
-            self.statemachine_map.get(request.key).trigger(Event.READ)
-
-            # Read from the local database
-            if (request.dest.host, request.dest.port) == self.cluster_handler.get_address():
-                success, value = self.database.read(request.key.decode(request.encoding))
-
-            elif request.dest.host == NULL_DESTINATION_HOST: # Null destination
-                success, value = self.database.read(request.key.decode(request.encoding))
-                if not success: # Could not read from the local database
+            if request.payload.blind: # A blind read
+                success, value = self.database.read(
+                    request.payload.key.decode(request.payload.encoding))
+                if not success: # Not found in the local database
                     success, value = self.cluster_handler.read_protocol(request)
             
-            else: # Redirect request
-                success, value = self.cluster_handler.read_protocol(request)
+            else: # Not a blind read
+                dst_addr = (request.dest.host, request.dest.port)
 
-            self.statemachine_map.get(request.key).trigger(Event.DONE)
+                # The node is the destination
+                if dst_addr == self.cluster_handler.get_address():
+                    success, value = self.database.read(
+                        request.payload.key.decode(request.payload.encoding))
+                else: # Redirect request
+                    success, value = self.cluster_handler.read_protocol(request)
+
+            self.statemachine_map.get(request.payload.key).trigger(Event.DONE)
+            
+        except PollingTimeoutException:
+            pass # Could not trigger state machine
+
+        # Send acknowledgment
+        return pirestore_pb2.ReadAck(success=success, val=value, encoding=request.payload.encoding)
+    
+    def Update(self, request, context):
+        try: # Try to execute
+            self.create_statemachine_if_not_exists(request.payload.key)
+            self.statemachine_map.get(request.payload.key).poll(Event.WRITE)
+            self.statemachine_map.get(request.payload.key).trigger(Event.WRITE)
+
+            if request.payload.blind: # A blind update
+                success = self.database.update(
+                    request.payload.key.decode(request.payload.encoding),
+                    request.payload.val.decode(request.payload.encoding))
+                
+                if success: # Updated locally
+                    request.payload.replica += 1
+                
+                # Extend the protocol
+                if request.payload.replica != self.MAX_REPLICAS:
+                    _, ack = self.cluster_handler.update_protocol(request)
+                    
+                    # Some pairs are updated
+                    if ack > request.payload.replica:
+                        request.payload.replica = ack # inplace!
+                
+            else: # Not a blind update
+                is_destination = False
+                for each in request.dests.vals:
+                    dst_addr = (each.host, each.port) 
+                    if dst_addr == self.cluster_handler.get_address():
+                        is_destination = True
+                        break
+                
+                # The node is the destination
+                if is_destination:
+                    success = self.database.update(
+                        request.payload.key.decode(request.payload.encoding),
+                        request.payload.val.decode(request.payload.encoding))
+
+                else: # Redirect request
+                    _, ack = self.cluster_handler.update_protocol(request)
+
+                    # Some pairs are updated
+                    if ack > request.payload.replica:
+                        request.payload.replica = ack # inplace!
+
+            self.statemachine_map.get(request.payload.key).trigger(Event.DONE)
 
         except PollingTimeoutException:
             pass # Could not trigger state machine
 
-        return pirestore_pb2.ReadAck(success=success, val=value, encoding=request.encoding)
-    
-    def Update(self, request, context):
-        return super().Update(request, context)
+        # Send acknowledgment
+        return pirestore_pb2.WriteAck(replica=request.payload.replica)
     
     def Delete(self, request, context):
         return super().Delete(request, context)
