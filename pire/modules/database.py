@@ -1,5 +1,8 @@
 import pickledb
+import struct
 from typing import Tuple
+
+MODE = "<IH" # Little endian (integer-(high)word)
 
 class LocalDatabase:
     def __init__(self, local_db_path:str) -> None:
@@ -16,19 +19,26 @@ class LocalDatabase:
         self.__db.dump()
 
     def create(self, key:object, value:object) -> bool:
-        self.__db.set(key, value)
+        self.__db.set(key, struct.pack(MODE, value, 0))
         self.__size += 1
         return True
 
-    def read(self, key:object) -> Tuple[bool,object]:
-        value = self.__db.get(key)
-        if not value: # Key does not exist
-            return False, None
-        return True, value
+    def read(self, key:object) -> Tuple[bool,object,int]:
+        entry = self.__db.get(key)
+        if not entry: # Key does not exist
+            return False, None, None
+        value, version = struct.unpack(MODE, entry)
+        return True, value, version
+
+    def validate(self, key:object, value:object, version:int) -> Tuple[bool]:
+        self.__db.set(key, struct.pack(MODE, value, version))
+        return True
 
     def update(self, key:object, value:object) -> bool:
-        if self.__db.exists(key):
-            self.__db.set(key, value)
+        entry = self.__db.get(key)
+        if entry: # Key exists
+            value, version = struct.unpack(MODE, entry)
+            self.__db.set(key, struct.pack(MODE, value, version+1))
             return True
         else: # Key does not exist
             return False

@@ -44,19 +44,20 @@ class ClusterHandler:
 
     """ CREATE Protocol Implementation Starts """
 
-    async def __call_Create(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.CreateProtocolMessage) -> int:
+    async def __call_Create(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.WriteProtocolMessage) -> Tuple[int,List:pirestore_pb2.Address]:
         try: # Try to send a message
             stub = self.__stub_map.get(neigh_addr)
             response = await stub.Create(request)
             return response.ack, response.visited
         
-        # Channel is broken or error in code
+        # Channel is broken or error in the code
         except Exception as exception:
             print(exception.with_traceback())
             return request.metadata.replica, request.metadata.visited
 
-    async def create_protocol(self, request:pirestore_pb2.CreateProtocolMessage) -> Tuple[bool,int]:
-        visited:List[Tuple[str,int]] = [(each.host, each.port) for each in request.metadata.visited.vals]
+    async def create_protocol(self, request:pirestore_pb2.WriteProtocolMessage) -> Tuple[bool,int]:
+        visited:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
+                                        for each in request.metadata.visited.vals]
         
         for addr in self.__neighbours:
             if addr not in visited:
@@ -77,24 +78,42 @@ class ClusterHandler:
 
     """ READ Protocol Implementation Starts """
 
-    async def __call_Read(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,int]:
+    async def __call_Read(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,bytes,List:pirestore_pb2.Address]:
         try: # Try to send a message
             stub = self.__stub_map.get(neigh_addr)
             response = await stub.Read(request)
             return response.success, response.val, response.visited
         
-        # Channel is broken or error in code
+        # Channel is broken or error in the code
         except Exception as exception:
             print(exception.with_traceback())
             return False, None, request.visited
 
-    async def read_protocol(self, request) -> Tuple[bool,int]:
-        pass
+    async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,bytes]:
+        visited:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
+                                        for each in request.metadata.visited.vals]
+        
+        for addr in self.__neighbours:
+            if addr not in visited:
+                success, val, visited = self.__call_Read(addr, request)
+                if not success:
+                    request.metadata.visited = visited
+                else: # Pair found
+                    break
+
+        return success, val
 
     """ READ Protocol Implementation Ends """
 
     
     """ VALIDATE Protocol Implementation Starts """
+
+    async def __call_Validate():
+        pass
+
+    async def validate_protocol(self, request) -> Tuple[bool,int]:
+        pass
+
     """ VALIDATE Protocol Implementation Starts """
 
 

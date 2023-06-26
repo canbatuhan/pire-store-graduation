@@ -80,14 +80,13 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
             key = request.payload.key
             val = request.payload.val
 
+            self.create_statemachine_if_not_exists(key)
             self.statemachine_map.get(key).poll(Event.WRITE)
             self.statemachine_map.get(key).trigger(Event.WRITE)
 
-            success = self.database.create(
-                key.encode(self.ENCODING),
-                val.encode(self.ENCODING))
+            success = self.database.create(key, val)
             
-            if success: # Creates in local
+            if success: # Creates in the local
                 request.metadata.visited.extend([pirestore_pb2.Address(host=host, port=port)])
                 request.metadata.replica += 1
             
@@ -106,6 +105,40 @@ class PireNode(pirestore_pb2_grpc.PireStoreServicer):
                 visited = request.metadata.visited)
     
     async def Read(self, request, context):
+        try:
+            host, port = self.cluster_handler.get_address()
+            key = request.payload.key
+
+            self.create_statemachine_if_not_exists(key)
+            self.statemachine_map.get(key).poll(Event.READ)
+            self.statemachine_map.get(key).trigger(Event.WRITE)
+
+            success, val, version = self.database.read(key)
+            
+            if success: # Reads from the local, validate
+                grpcValidate = pirestore_pb2.ValidateProtocolMessage(
+                    payload=pirestore_pb2.ValidatePayload(
+                    key=key, val=val, version=version))
+                
+                val_val, val_version = self.cluster_handler.validate_protocol(grpcValidate)
+                
+                if version < val_version: # Eventual-consistency !
+                    self.database.validate(key, val_val, val_version)
+        
+            else: # Could not find in the local, extend the protocol
+                request.metadata.visited.extend([pirestore_pb2.Address(host=host, port=port)])
+                success, val = self.cluster_handler.read_protocol(request)
+            
+            self.statemachine_map.get(key).trigger(Event.DONE)
+
+        except: # State machine polling timeout
+            pass 
+
+        return pirestore_pb2.WriteAck(
+                ack     = request.metadata.replica,
+                visited = request.metadata.visited)      
+
+    async def Validate(self, request, context):
         pass
     
     async def Update(self, request, context):

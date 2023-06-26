@@ -28,4 +28,3 @@ node:
     api_port:  8774
   
   n_workers: 10
-  encoding:  "utf-8"
