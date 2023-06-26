@@ -3,17 +3,17 @@ syntax = "proto3";
 package pirestore;
 
 service PireStore {
-    rpc Greet    (Greeting)              returns (Empty)    {}
-    rpc Discover (Discovery)             returns (Empty)    {}
-    rpc Create   (CreateProtocolMessage) returns (WriteAck) {}
-    rpc Read     (ReadProtocolMessage)   returns (ReadAck)  {}
-    rpc Update   (UpdateProtocolMessage) returns (WriteAck) {}
-    rpc Delete   (DeleteProtocolMessage) returns (WriteAck) {}
+    rpc Greet    (GreetProtocolMessage)    returns (Empty)       {}
+    rpc Create   (WriteProtocolMessage)    returns (WriteAck)    {}
+    rpc Read     (ReadProtocolMessage)     returns (ReadAck)     {}
+    rpc Validate (ValidateProtocolMessage) returns (ValidateAck) {}
+    rpc Update   (WriteProtocolMessage)    returns (WriteAck)    {}
+    rpc Delete   (WriteProtocolMessage)    returns (WriteAck)    {}
 }
 
-/* Main Messages */
+/* Main Message Types */
 
-message Greeting {
+message GreetProtocolMessage {
     Address sender = 1;
 }
 
@@ -21,43 +21,39 @@ message Empty {
     // Empty body
 }
 
-message Discovery {
-    repeated PairInfo deleted = 10;
-    repeated PairInfo created = 12;
-    Address           sender  = 14;
-}
+/* Protocol Messages */
 
-message CreateProtocolMessage {
-    WritePayload     payload = 1;
-    bool             direct  = 10;
-    repeated Address visited = 12;
-}
-
-message UpdateProtocolMessage {
-    WritePayload     payload = 1;
-    repeated Address dests   = 10;
-}
-
-message DeleteProtocolMessage {
-    WritePayload     payload = 1;
-    repeated Address dests   = 10;
-}
-
-message WriteAck {
-    uint32 replica = 1;
+message WriteProtocolMessage {
+    WritePayload  payload  = 1;
+    WriteMetadata metadata = 2;
 }
 
 message ReadProtocolMessage {
-    ReadPayload payload = 1;
-    Address     dest    = 10;
+    ReadPayload  payload  = 1;
+    ReadMetadata metadata = 2;
+}
+
+message ValidateProtocolMessage {
+    ValidatePayload payload = 1;
+}
+
+/* Acknowledgments */
+
+message WriteAck {
+    uint32           ack     = 1;
+    repeated Address visited = 10;
 }
 
 message ReadAck {
-    bool   success  = 1;
-    bytes  val      = 2;
-    string encoding = 3;
+    bool             success = 1;
+    bytes            val     = 2;
+    repeated Address visited = 10;
 }
 
+message ValidateAck {
+    bytes  val     = 1;
+    uint32 counter = 2;
+}
 
 /* Helper Message Types */
 
@@ -66,22 +62,26 @@ message Address {
     uint32 port = 2;
 }
 
-message PairInfo {
-    bytes   key   = 1;
-    uint32  hops  = 2;
-    Address owner = 10;
+message WritePayload {
+    bytes key = 1;
+    bytes val = 2;
 }
 
-message WritePayload {
-    uint32 replica  = 1;
-    bool   blind    = 2;
-    bytes  key      = 3;
-    bytes  val      = 4;
-    string encoding = 5;
+message WriteMetadata {
+    uint32           replica = 1;
+    repeated Address visited = 10;
 }
 
 message ReadPayload {
-    bool    blind    = 1;
-    bytes   key      = 2;
-    string  encoding = 3;
+    bytes key = 1;
+}
+
+message ReadMetadata {
+    repeated Address visited = 1;
+}
+
+message ValidatePayload {
+    bytes  key     = 1;
+    bytes  val     = 2;
+    uint32 counter = 3;
 }

@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import pire.modules.service.pirestore_pb2 as pirestore__pb2
+import pirestore_pb2 as pirestore__pb2
 
 
 class PireStoreStub(object):
@@ -16,17 +16,12 @@ class PireStoreStub(object):
         """
         self.Greet = channel.unary_unary(
                 '/pirestore.PireStore/Greet',
-                request_serializer=pirestore__pb2.Greeting.SerializeToString,
-                response_deserializer=pirestore__pb2.Empty.FromString,
-                )
-        self.Discover = channel.unary_unary(
-                '/pirestore.PireStore/Discover',
-                request_serializer=pirestore__pb2.Discovery.SerializeToString,
+                request_serializer=pirestore__pb2.GreetProtocolMessage.SerializeToString,
                 response_deserializer=pirestore__pb2.Empty.FromString,
                 )
         self.Create = channel.unary_unary(
                 '/pirestore.PireStore/Create',
-                request_serializer=pirestore__pb2.CreateProtocolMessage.SerializeToString,
+                request_serializer=pirestore__pb2.WriteProtocolMessage.SerializeToString,
                 response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
         self.Read = channel.unary_unary(
@@ -34,14 +29,19 @@ class PireStoreStub(object):
                 request_serializer=pirestore__pb2.ReadProtocolMessage.SerializeToString,
                 response_deserializer=pirestore__pb2.ReadAck.FromString,
                 )
+        self.Validate = channel.unary_unary(
+                '/pirestore.PireStore/Validate',
+                request_serializer=pirestore__pb2.ValidateProtocolMessage.SerializeToString,
+                response_deserializer=pirestore__pb2.ValidateAck.FromString,
+                )
         self.Update = channel.unary_unary(
                 '/pirestore.PireStore/Update',
-                request_serializer=pirestore__pb2.UpdateProtocolMessage.SerializeToString,
+                request_serializer=pirestore__pb2.WriteProtocolMessage.SerializeToString,
                 response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
         self.Delete = channel.unary_unary(
                 '/pirestore.PireStore/Delete',
-                request_serializer=pirestore__pb2.DeleteProtocolMessage.SerializeToString,
+                request_serializer=pirestore__pb2.WriteProtocolMessage.SerializeToString,
                 response_deserializer=pirestore__pb2.WriteAck.FromString,
                 )
 
@@ -55,12 +55,6 @@ class PireStoreServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Discover(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
     def Create(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -68,6 +62,12 @@ class PireStoreServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def Read(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Validate(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -90,17 +90,12 @@ def add_PireStoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Greet': grpc.unary_unary_rpc_method_handler(
                     servicer.Greet,
-                    request_deserializer=pirestore__pb2.Greeting.FromString,
-                    response_serializer=pirestore__pb2.Empty.SerializeToString,
-            ),
-            'Discover': grpc.unary_unary_rpc_method_handler(
-                    servicer.Discover,
-                    request_deserializer=pirestore__pb2.Discovery.FromString,
+                    request_deserializer=pirestore__pb2.GreetProtocolMessage.FromString,
                     response_serializer=pirestore__pb2.Empty.SerializeToString,
             ),
             'Create': grpc.unary_unary_rpc_method_handler(
                     servicer.Create,
-                    request_deserializer=pirestore__pb2.CreateProtocolMessage.FromString,
+                    request_deserializer=pirestore__pb2.WriteProtocolMessage.FromString,
                     response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
             'Read': grpc.unary_unary_rpc_method_handler(
@@ -108,14 +103,19 @@ def add_PireStoreServicer_to_server(servicer, server):
                     request_deserializer=pirestore__pb2.ReadProtocolMessage.FromString,
                     response_serializer=pirestore__pb2.ReadAck.SerializeToString,
             ),
+            'Validate': grpc.unary_unary_rpc_method_handler(
+                    servicer.Validate,
+                    request_deserializer=pirestore__pb2.ValidateProtocolMessage.FromString,
+                    response_serializer=pirestore__pb2.ValidateAck.SerializeToString,
+            ),
             'Update': grpc.unary_unary_rpc_method_handler(
                     servicer.Update,
-                    request_deserializer=pirestore__pb2.UpdateProtocolMessage.FromString,
+                    request_deserializer=pirestore__pb2.WriteProtocolMessage.FromString,
                     response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
             'Delete': grpc.unary_unary_rpc_method_handler(
                     servicer.Delete,
-                    request_deserializer=pirestore__pb2.DeleteProtocolMessage.FromString,
+                    request_deserializer=pirestore__pb2.WriteProtocolMessage.FromString,
                     response_serializer=pirestore__pb2.WriteAck.SerializeToString,
             ),
     }
@@ -140,24 +140,7 @@ class PireStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Greet',
-            pirestore__pb2.Greeting.SerializeToString,
-            pirestore__pb2.Empty.FromString,
-            options, channel_credentials,
-            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def Discover(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Discover',
-            pirestore__pb2.Discovery.SerializeToString,
+            pirestore__pb2.GreetProtocolMessage.SerializeToString,
             pirestore__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -174,7 +157,7 @@ class PireStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Create',
-            pirestore__pb2.CreateProtocolMessage.SerializeToString,
+            pirestore__pb2.WriteProtocolMessage.SerializeToString,
             pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -197,6 +180,23 @@ class PireStore(object):
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def Validate(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Validate',
+            pirestore__pb2.ValidateProtocolMessage.SerializeToString,
+            pirestore__pb2.ValidateAck.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def Update(request,
             target,
             options=(),
@@ -208,7 +208,7 @@ class PireStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Update',
-            pirestore__pb2.UpdateProtocolMessage.SerializeToString,
+            pirestore__pb2.WriteProtocolMessage.SerializeToString,
             pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -225,7 +225,7 @@ class PireStore(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/pirestore.PireStore/Delete',
-            pirestore__pb2.DeleteProtocolMessage.SerializeToString,
+            pirestore__pb2.WriteProtocolMessage.SerializeToString,
             pirestore__pb2.WriteAck.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

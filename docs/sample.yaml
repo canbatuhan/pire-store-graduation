@@ -1,7 +1,6 @@
 cluster:
-  max_replicas:    3
-  min_replicas:    1
-  discover_period: 2.0
+  max_replicas: 3
+  min_replicas: 2
 
 node:
   neighbours:
@@ -19,7 +18,7 @@ node:
     max_poll_time: 0.050000000
 
   database:
-    path: "/home/racoon/pire/local.db"
+    path: "./docs/local.db"
     min_poll_time: 0.025
     max_poll_time: 8.0
 
