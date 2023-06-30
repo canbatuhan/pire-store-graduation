@@ -1,29 +1,22 @@
-from quart import Quart, Response
-from pire.storage import PireStorage
+import yaml
+from pire.server import PireServer
+from pire.store  import PireStore
 
 class PireNode:
-    SERVER  = Quart(__name__)
-    STORAGE = None # pire-store
+    SERVER = None # quart app
+    STORE  = None # pire-store
 
-    def __init__(self, node_config_path:str) -> None:
-        self.STORAGE = PireStorage(node_config_path)
+    def __init__(self, config_path:str=None) -> None:
+        with open(config_path, "r") as file:
+            cfg = dict(yaml.load(file))
 
-    @SERVER.route("/pire/kv/create", methods=['POST'])
-    async def create():
-        print("Create protocol initiated")
-        return Response(status=200)
+        server_cfg = cfg.get("server")
+        store_cfg  = cfg.get("store")
 
-    @SERVER.route("/pire/kv/read", methods=['POST'])
-    async def read():
-        print("Read protocol initiated")
-        return Response(status=200)
+        self.SERVER = PireServer(server_cfg)
+        self.STORE  = PireStore(store_cfg) 
 
-    @SERVER.route("/pire/kv/update", methods=['POST'])
-    async def update():
-        print("Update protocol initiated")
-        return Response(status=200)
-
-    @SERVER.route("/pire/kv/delete", methods=['POST'])
-    async def delete():
-        print("Delete protocol initiated")
-        return Response(status=200)
+    async def main(self) -> None:
+        await self.STORE.run()
+        await self.SERVER.run()
+    

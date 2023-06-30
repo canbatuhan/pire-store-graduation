@@ -2,7 +2,6 @@ import copy
 from typing import Dict
 import asyncio
 import grpc
-import yaml
 
 from pire.modules.cluster      import ClusterHandler
 from pire.modules.statemachine import ReplicatedStateMachine
@@ -11,65 +10,67 @@ from pire.modules.service      import pirestore_pb2
 from pire.modules.service      import pirestore_pb2_grpc
 from pire.util.event           import Event
 
-class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
+class PireStore(pirestore_pb2_grpc.PireStoreServicer):
     # Cluster Constants
     MAX_REPLICAS     = int()
     MIN_REPLICAS     = int()
 
     # Node Constants
     HOST             = str()
-    API_PORT         = int()
-    GRPC_PORT        = int()
+    PORT             = int()
     MIN_DUMP_TIMEOUT = float()
     MAX_DUMP_TIMEOUT = float()
     ENCODING         = str()
 
-    def __init__(self, config_file_path:str) -> None:
-        with open(config_file_path, "r") as file:
-            cfg = dict(yaml.load(file))
+    def __init__(self, config:dict) -> None: 
+        # Sub-configurations
+        replica_cfg   = config.get("replication")
+        neighbour_cfg = config.get("neighbours")
+        sm_cfg        = config.get("statemachine")
+        db_cfg        = config.get("database")
 
-        # Configurations
-        cluster_cfg    = cfg.get("cluster")
-        node_cfg       = cfg.get("node")
-        neighbour_cfg  = node_cfg.get("neighbours")
-        sm_cfg         = node_cfg.get("statemachine")
-        db_cfg         = node_cfg.get("database")
-        comm_cfg       = node_cfg.get("communication")
+        # Replica Criteria Configuration
+        self.MAX_REPLICAS = replica_cfg.get("max_replicas")
+        self.MIN_REPLICAS = replica_cfg.get("min_replicas")
 
-        # Cluster Configurations
-        self.MAX_REPLICAS    = cluster_cfg.get("max_replicas")
-        self.MIN_REPLICAS    = cluster_cfg.get("min_replicas")
+        # Neighbour Configurations
+        neighbours = [(n.get("host"), n.get("port")) for n in neighbour_cfg]
 
-        # Node Configurations
-        self.HOST             = comm_cfg.get("host")
-        self.GRPC_PORT        = comm_cfg.get("grpc_port")
-        self.API_PORT         = comm_cfg.get("api_port")
-        self.N_WORKERS        = node_cfg.get("n_workers")
+        # Communication Configurations
+        self.HOST = config.get("host")
+        self.PORT = config.get("port")
+
+        # State Machine Configurations
+        sm_min_poll_time = sm_cfg.get("min_poll_time")
+        sm_max_poll_time = sm_cfg.get("max_poll_time")
+
+        # Database Configurations
+        database_file_path    = db_cfg.get("path")
         self.MIN_DUMP_TIMEOUT = db_cfg.get("min_poll_time")
         self.MAX_DUMP_TIMEOUT = db_cfg.get("max_poll_time")
-        self.ENCODING         = node_cfg.get("encoding")
 
         # gRPC Service
         self.__store_service = grpc.aio.server()
         pirestore_pb2_grpc.add_PireStoreServicer_to_server(self, self.__store_service)
-        self.__store_service.add_insecure_port("127.0.0.1:{}".format(self.GRPC_PORT))
+        self.__store_service.add_insecure_port("127.0.0.1:{}".format(self.PORT))
 
         # Cluster Handler
-        neighbours           = [(n.get("host"), n.get("port")) for n in neighbour_cfg]
         self.cluster_handler = ClusterHandler(neighbours, self.MAX_REPLICAS, self.MIN_REPLICAS)
         
         # Replicated State Machine
-        self.sample_statemachine = ReplicatedStateMachine(sm_cfg.get("min_poll_time"), sm_cfg.get("max_poll_time"))
+        self.sample_statemachine = ReplicatedStateMachine(sm_min_poll_time, sm_max_poll_time)
         self.statemachine_map:Dict[bytes,ReplicatedStateMachine] = dict()
         
         # Local Database
-        self.database = LocalDatabase(db_cfg.get("path"))
+        self.database = LocalDatabase(database_file_path)
 
-    def create_statemachine_if_not_exists(self, key:bytes) -> None:
-        if self.statemachine_map.get(key) == None:
+    def __get_state_machine(self, key:bytes) -> ReplicatedStateMachine:
+        statemachine = statemachine
+        if statemachine == None: # Create if not exists
             statemachine = copy.deepcopy(self.sample_statemachine)
             statemachine.start()
             self.statemachine_map.update({key: statemachine})
+        return statemachine
 
     """ gRPC Service Implementation Starts """
 
@@ -83,9 +84,9 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
             key   = request.payload.key
             value = request.payload.value
 
-            self.create_statemachine_if_not_exists(key)
-            self.statemachine_map.get(key).poll(Event.WRITE)
-            self.statemachine_map.get(key).trigger(Event.WRITE)
+            statemachine = self.__get_state_machine(key)
+            statemachine.poll(Event.WRITE)
+            statemachine.trigger(Event.WRITE)
 
             success = self.database.create(key, value)
             
@@ -99,7 +100,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
                     if ack > request.metadata.replica:
                         request.metadata.replica = ack
 
-            self.statemachine_map.get(key).trigger(Event.DONE)
+            statemachine.trigger(Event.DONE)
 
         except: # State machine polling timeout
             pass
@@ -112,9 +113,9 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
         try:
             key = request.payload.key
 
-            self.create_statemachine_if_not_exists(key)
-            self.statemachine_map.get(key).poll(Event.READ)
-            self.statemachine_map.get(key).trigger(Event.READ)
+            statemachine = self.__get_state_machine(key)
+            statemachine.poll(Event.READ)
+            statemachine.trigger(Event.READ)
 
             success, value, version = self.database.read(key)
             
@@ -134,7 +135,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
                 success, value, visited = await self.cluster_handler.read_protocol(request)
                 request.metada.visited = visited
             
-            self.statemachine_map.get(key).trigger(Event.DONE)
+            statemachine.trigger(Event.DONE)
             return pirestore_pb2.ReadAck(
                 success = success,
                 value   = value,
@@ -152,9 +153,9 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
             req_value   = request.payload.value
             req_version = request.payload.version
 
-            self.create_statemachine_if_not_exists(key)
-            self.statemachine_map.get(key).poll(Event.READ)
-            self.statemachine_map.get(key).trigger(Event.READ)
+            statemachine = self.__get_state_machine(key)
+            statemachine.poll(Event.READ)
+            statemachine.trigger(Event.READ)
 
             _, value, version = self.database.read(key)
 
@@ -164,7 +165,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
                 value = req_value
                 version = req_version
 
-            self.statemachine_map.get(key).trigger(Event.DONE)
+            statemachine.trigger(Event.DONE)
             return pirestore_pb2.ValidateAck(value=value, version=version)
 
         except: # State machine polling timeout
@@ -177,9 +178,9 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
             key   = request.payload.key
             value = request.payload.value
 
-            self.create_statemachine_if_not_exists(key)
-            self.statemachine_map.get(key).poll(Event.WRITE)
-            self.statemachine_map.get(key).trigger(Event.WRITE)
+            statemachine = self.__get_state_machine(key)
+            statemachine.poll(Event.WRITE)
+            statemachine.trigger(Event.WRITE)
 
             success = self.database.update(key, value)
             if success: # Updates in the local
@@ -192,7 +193,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
                     request.metadata.replica = ack
                     request.metadata.visited = visited
 
-            self.statemachine_map.get(key).trigger(Event.DONE)
+            statemachine.trigger(Event.DONE)
 
         except: # State machine polling timeout
             pass
@@ -205,9 +206,9 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
         try:
             key = request.payload.key
 
-            self.create_statemachine_if_not_exists(key)
-            self.statemachine_map.get(key).poll(Event.WRITE)
-            self.statemachine_map.get(key).trigger(Event.WRITE)
+            statemachine = self.__get_state_machine(key)
+            statemachine.poll(Event.WRITE)
+            statemachine.trigger(Event.WRITE)
 
             success = self.database.delete(key)
             if success: # Updates in the local
@@ -220,7 +221,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
                     request.metadata.replica = ack
                     request.metadata.visited = visited
 
-            self.statemachine_map.get(key).trigger(Event.DONE)
+            statemachine.trigger(Event.DONE)
 
         except: # State machine polling timeout
             pass
@@ -253,7 +254,7 @@ class PireStorage(pirestore_pb2_grpc.PireStoreServicer):
     async def run(self) -> None:
         self.database.start()
         await self.cluster_handler.start(
-            self.HOST, self.API_PORT)
+            self.HOST, self.PORT)
         asyncio.gather(
             self.__store_service.start(),
             self.__dumping_task())

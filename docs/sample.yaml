@@ -1,8 +1,14 @@
-cluster:
-  max_replicas: 3
-  min_replicas: 2
+server:
+  port: 8090
 
-node:
+store:
+  host: "192.168.1.120"
+  port: 8080
+
+  replication:
+    max_replicas: 3
+    min_replicas: 2
+
   neighbours:
     - host: "192.168.1.121"
       port: 8080
@@ -15,8 +21,3 @@ node:
     path: "./docs/local.db"
     min_poll_time: 0.025
     max_poll_time: 8.0
-
-  communication:
-    host:     "192.168.1.120"
-    grpc_port: 8080
-    api_port:  8090

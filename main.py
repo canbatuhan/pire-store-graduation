@@ -13,18 +13,12 @@ sys.stderr = f"""
 parser = argparse.ArgumentParser("pire-store HTTP Server for user interaction")
 parser.add_argument("-config", default="./docs/sample.yaml")
 args = vars(parser.parse_args())
-NODE_CONFIG_PATH = args["config"]
+CONFIG_PATH = args["config"]
 
 # Create Node
-node = PireNode(NODE_CONFIG_PATH)
-async def runner():
-    await node.STORAGE.run()
-    await node.SERVER.run_task(
-        debug=False,
-        host="127.0.0.1",
-        port=node.STORAGE.API_PORT)
+node = PireNode(CONFIG_PATH)
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(runner())
+    loop.run_until_complete(node.main())
     
