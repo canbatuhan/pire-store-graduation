@@ -46,13 +46,13 @@ message WriteAck {
 
 message ReadAck {
     bool             success = 1;
-    bytes            val     = 2;
+    bytes            value   = 2;
     repeated Address visited = 10;
 }
 
 message ValidateAck {
-    bytes  val     = 1;
-    uint32 counter = 2;
+    bytes  value   = 1;
+    uint32 version = 2;
 }
 
 /* Helper Message Types */
@@ -63,8 +63,8 @@ message Address {
 }
 
 message WritePayload {
-    bytes key = 1;
-    bytes val = 2;
+    bytes key   = 1;
+    bytes value = 2;
 }
 
 message WriteMetadata {
@@ -82,6 +82,6 @@ message ReadMetadata {
 
 message ValidatePayload {
     bytes  key     = 1;
-    bytes  val     = 2;
-    uint32 counter = 3;
+    bytes  value   = 2;
+    uint32 version = 3;
 }

@@ -5,13 +5,7 @@ cluster:
 node:
   neighbours:
     - host: "192.168.1.121"
-      port: 8773
-    - host: "192.168.1.122"
-      port: 8773
-    - host: "192.168.1.123"
-      port: 8773
-    - host: "192.168.1.124"
-      port: 8773
+      port: 8080
 
   statemachine: 
     min_poll_time: 0.000000052
@@ -24,7 +18,5 @@ node:
 
   communication:
     host:     "192.168.1.120"
-    grpc_port: 8773
-    api_port:  8774
-  
-  n_workers: 10
+    grpc_port: 8080
+    api_port:  8090

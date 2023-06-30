@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import pirestore_pb2 as pirestore__pb2
+import pire.modules.service.pirestore_pb2 as pirestore__pb2
 
 
 class PireStoreStub(object):
