@@ -64,7 +64,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         # Local Database
         self.database = LocalDatabase(database_file_path)
 
-    def __get_state_machine(self, key:bytes) -> ReplicatedStateMachine:
+    def get_state_machine(self, key:bytes) -> ReplicatedStateMachine:
         statemachine = statemachine
         if statemachine == None: # Create if not exists
             statemachine = copy.deepcopy(self.sample_statemachine)
@@ -84,7 +84,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             key   = request.payload.key
             value = request.payload.value
 
-            statemachine = self.__get_state_machine(key)
+            statemachine = self.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 
@@ -113,18 +113,18 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         try:
             key = request.payload.key
 
-            statemachine = self.__get_state_machine(key)
+            statemachine = self.get_state_machine(key)
             statemachine.poll(Event.READ)
             statemachine.trigger(Event.READ)
 
             success, value, version = self.database.read(key)
             
             if success: # Reads from the local, validate
-                grpcValidate = pirestore_pb2.ValidateProtocolMessage(
-                    payload=pirestore_pb2.ValidatePayload(
-                    key=key, value=value, version=version))
+                grpc_validate = pirestore_pb2.ValidateProtocolMessage(
+                    payload = pirestore_pb2.ValidatePayload(
+                        key = key, value = value, version = version))
                 
-                val_value, val_version = await self.cluster_handler.validate_protocol(grpcValidate)
+                val_value, val_version = await self.cluster_handler.validate_protocol(grpc_validate)
                 
                 if version < val_version: # Eventual-consistency !
                     self.database.validate(key, val_value, val_version)
@@ -153,7 +153,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             req_value   = request.payload.value
             req_version = request.payload.version
 
-            statemachine = self.__get_state_machine(key)
+            statemachine = self.get_state_machine(key)
             statemachine.poll(Event.READ)
             statemachine.trigger(Event.READ)
 
@@ -178,7 +178,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             key   = request.payload.key
             value = request.payload.value
 
-            statemachine = self.__get_state_machine(key)
+            statemachine = self.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 
@@ -206,7 +206,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         try:
             key = request.payload.key
 
-            statemachine = self.__get_state_machine(key)
+            statemachine = self.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 

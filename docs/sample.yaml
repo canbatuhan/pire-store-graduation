@@ -12,6 +12,12 @@ store:
   neighbours:
     - host: "192.168.1.121"
       port: 8080
+    - host: "192.168.1.122"
+      port: 8080
+    - host: "192.168.1.123"
+      port: 8080
+    - host: "192.168.1.124"
+      port: 8080
 
   statemachine: 
     min_poll_time: 0.000000052

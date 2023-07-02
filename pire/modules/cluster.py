@@ -28,11 +28,14 @@ class ClusterHandler:
                 stub = pirestore_pb2_grpc.PireStoreStub(
                     grpc.aio.insecure_channel(addr_as_str(*addr)))
                 
-                grpcGreet = pirestore_pb2.GreetProtocolMessage()
-                grpcGreet.sender.host = host
-                grpcGreet.sender.port = port
+                grpc_greet = pirestore_pb2.GreetProtocolMessage(
+                    sender = pirestore_pb2.Address(
+                        host = host,
+                        port = port
+                    )
+                )
                 
-                _ = await stub.Greet(grpcGreet)
+                _ = await stub.Greet(grpc_greet)
                 self.__stub_map.update({addr:stub})
 
             except Exception as exception:
