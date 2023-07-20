@@ -205,6 +205,6 @@ class PireNode:
         await self.STORE.run()
         await self.SERVER.run_task(
             debug = False,
-            host  = "127.0.0.1",
+            host  = "0.0.0.0",
             port  = self.__server_cfg.get("port"))
     

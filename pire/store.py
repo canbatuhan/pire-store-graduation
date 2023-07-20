@@ -52,7 +52,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         # gRPC Service
         self.__store_service = grpc.aio.server()
         pirestore_pb2_grpc.add_PireStoreServicer_to_server(self, self.__store_service)
-        self.__store_service.add_insecure_port("127.0.0.1:{}".format(self.PORT))
+        self.__store_service.add_insecure_port("0.0.0.0:{}".format(self.PORT))
 
         # Cluster Handler
         self.cluster_handler = ClusterHandler(neighbours, self.MAX_REPLICAS, self.MIN_REPLICAS)
