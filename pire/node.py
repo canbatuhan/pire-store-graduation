@@ -156,8 +156,8 @@ class PireNode:
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
 
-            success, _, _ = await self.STORE.cluster_handler.update_protocol(grpc_write)
-            if success: # Success criteria is met
+            ack, _ = await self.STORE.cluster_handler.update_protocol(grpc_write)
+            if ack: # Success criteria is met
                 status_code = 200
 
             statemachine.trigger(Event.DONE)

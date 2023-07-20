@@ -160,10 +160,10 @@ class ClusterHandler:
             print(exception.with_traceback(None))
             return request.metadata.replica, request.metadata.visited
 
-    async def update_protocol(self, request) -> Tuple[bool,int,List[pirestore_pb2.Address]]:
+    async def update_protocol(self, request) -> Tuple[int,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
                                               for each in request.metadata.visited.vals]
-        
+        """
         neighbours_traverse = self.__owner_map.get(request.payload.key)
         if neighbours_traverse == None: # The node is not an owner
             random.shuffle(self.__neighbours)
@@ -179,8 +179,19 @@ class ClusterHandler:
 
             if request.metadata.replica == self.MAX_REPLICAS:
                 break # Halt
+        """
+        random.shuffle(self.__neighbours)
+        for addr in self.__neighbours:
 
-        return request.metadata.replica >= self.MIN_REPLICAS, request.metadata.replica, request.metadata.visited
+            if addr not in visited_addrs:
+                ack, visited = await self.__call_Update(addr, request)
+                request.metadata.visited = visited
+
+                if ack: # Updated in the neighbour
+                    request.metadata.replica = ack
+                    break # Halt
+
+        return request.metadata.replica, request.metadata.visited
    
     """ UPDATE Protocol Implementation Ends """
 

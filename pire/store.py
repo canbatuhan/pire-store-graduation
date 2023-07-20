@@ -186,12 +186,13 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             if success: # Updates in the local
                 request.metadata.replica += 1
 
-            request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
-            if request.metadata.replica < self.MAX_REPLICAS:
-                _, ack, visited = await self.cluster_handler.update_protocol(request)
-                if ack > request.metadata.replica:
-                    request.metadata.replica = ack
-                    request.metadata.visited = visited
+            else: # Failed in the local
+                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
+                if request.metadata.replica < self.MAX_REPLICAS:
+                    ack, visited = await self.cluster_handler.update_protocol(request)
+                    if ack: # Updated in the neighbour
+                        request.metadata.replica = ack
+                        request.metadata.visited = visited
 
             statemachine.trigger(Event.DONE)
 
