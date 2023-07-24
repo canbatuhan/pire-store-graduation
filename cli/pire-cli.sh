@@ -1,11 +1,39 @@
 #!/bin/bash
 
-addresses=("192.168.1.120" "192.168.1.121" "192.168.1.122" "192.168.1.123" "192.168.1.124")
+CONFIG_FILE="./config.yaml"
+VAR_NAME="nodes"
+
+parse_yaml() {
+    local CONFIG_FILE="$1"
+    local VAR_NAME="$2"
+    eval "$VAR_NAME=()"
+
+    local host=""
+    local port=""
+
+    while IFS=: read -r key value; do
+        key=$(echo "$key" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+        value=$(echo "$value" | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+
+        if [ -z "$key" ]; then
+            continue
+        fi
+
+        if [ "$key" == "- host" ]; then
+            host="$value"
+
+        elif [ "$key" == "port" ]; then
+            port="$value"
+            eval "${VAR_NAME}+=(\"$host:$port\")"
+
+        fi
+    done < "$CONFIG_FILE"
+}
 
 select_random_address() {
-    local num_addresses=${#addresses[@]}
+    local num_addresses=${#nodes[@]}
     local random_index=$((RANDOM % num_addresses))
-    echo "${addresses[random_index]}"
+    echo "${nodes[random_index]}"
 }
 
 send_request() {
@@ -16,6 +44,8 @@ send_request() {
     local value=$5
     curl -X "$method" "http://$address$path" -d "key=$key&value=$value"
 }
+
+parse_yaml "$CONFIG_FILE" "$VAR_NAME"
 
 while true; do
     read -rp "pire-store > " command key value
