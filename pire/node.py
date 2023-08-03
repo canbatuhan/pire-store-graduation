@@ -148,17 +148,16 @@ class PireNode:
             local_success = self.STORE.database.update(key, value)
             grpc_visited = [__address_message(self.STORE.HOST, self.STORE.PORT)]
 
-            if local_success: # Updated successfully in the local
-                grpc_write = __write_message(
-                    key, value, 1, grpc_visited)
+            if local_success: # Updated locally
+                status_code = 200
 
             else: # Failed to update
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
-
-            ack, _ = await self.STORE.cluster_handler.update_protocol(grpc_write)
-            if ack: # Success criteria is met
-                status_code = 200
+                ack, _ = await self.STORE.cluster_handler.update_protocol(grpc_write)
+            
+                if ack: # Success criteria is met
+                    status_code = 200
 
             statemachine.trigger(Event.DONE)
 
