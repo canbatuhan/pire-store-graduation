@@ -49,7 +49,7 @@ class PireNode:
 
     def __init__(self, config_path:str=None) -> None:
         with open(config_path, "r") as file:
-            cfg = dict(yaml.load(file))
+            cfg = dict(yaml.load(file, Loader=yaml.SafeLoader))
 
         self.__server_cfg = cfg.get("server")
         self.__store_cfg  = cfg.get("store")
