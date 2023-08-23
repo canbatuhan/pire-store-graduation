@@ -255,10 +255,14 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                     timeout = self.MAX_DUMP_TIMEOUT
             pair_count = self.database.get_size()
 
+    async def __grpc_server_task(self) -> None:
+        await self.__store_service.start()
+        await self.__store_service.wait_for_termination()
+
     async def run(self) -> None:
         self.database.start()
         await self.cluster_handler.start(
             self.HOST, self.PORT)
-        asyncio.gather(
-            self.__store_service.start(),
+        await asyncio.gather(
+            self.__grpc_server_task(),
             self.__dumping_task())

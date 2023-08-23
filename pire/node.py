@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 import yaml
 from quart import Quart, request, Response
@@ -201,9 +202,11 @@ class PireNode:
         return Response(status=status_code)
 
     async def main(self) -> None:
-        await self.STORE.run()
-        await self.SERVER.run_task(
-            debug = False,
-            host  = "0.0.0.0",
-            port  = self.__server_cfg.get("port"))
+        await asyncio.gather(
+            self.STORE.run(),
+            self.SERVER.run_task(
+                debug = False,
+                host  = "0.0.0.0",
+                port  = self.__server_cfg.get("port"))
+        )
     
