@@ -45,7 +45,7 @@ class ClusterHandler:
     async def greet_protocol_receiver(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
         channel = grpc.aio.insecure_channel(addr_as_str(*addr))
-        self.__neighbours[addr] = pirestore_pb2_grpc.PireStoreStub(channel)
+        self.__stub_map[addr] = pirestore_pb2_grpc.PireStoreStub(channel)
 
     """ GREET Protocol Implementation Ends """
 
@@ -65,14 +65,15 @@ class ClusterHandler:
 
     async def create_protocol(self, request:pirestore_pb2.WriteProtocolMessage) -> Tuple[bool,int]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
-                                              for each in request.metadata.visited.vals]
+                                              for each in request.metadata.visited]
         
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
             if addr not in visited_addrs: # Unvisited neighbour
                 ack, visited = await self.__call_Create(request)
                 if ack > request.metadata.replica:
-                    request.metadata.visited = visited
+                    del request.metadata.visited[:]
+                    request.metada.visited.extend(visited)
                     request.metadata.replica = ack
 
                     # Remember the pair's location
@@ -106,14 +107,15 @@ class ClusterHandler:
 
     async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,bytes,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
-                                              for each in request.metadata.visited.vals]
+                                              for each in request.metadata.visited]
         
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
             if addr not in visited_addrs: # Unvisited neighbour
                 success, value, visited = await self.__call_Read(addr, request)
                 if not success: # Pair can not found
-                    request.metadata.visited = visited
+                    del request.metadata.visited[:]
+                    request.metada.visited.extend(visited)
                 else: # Pair found
                     break
 
@@ -162,7 +164,7 @@ class ClusterHandler:
 
     async def update_protocol(self, request) -> Tuple[int,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
-                                              for each in request.metadata.visited.vals]
+                                              for each in request.metadata.visited]
         """
         neighbours_traverse = self.__owner_map.get(request.payload.key)
         if neighbours_traverse == None: # The node is not an owner
@@ -185,7 +187,8 @@ class ClusterHandler:
 
             if addr not in visited_addrs:
                 ack, visited = await self.__call_Update(addr, request)
-                request.metadata.visited = visited
+                del request.metadata.visited[:]
+                request.metada.visited.extend(visited)
 
                 if ack: # Updated in the neighbour
                     request.metadata.replica = ack
@@ -211,7 +214,7 @@ class ClusterHandler:
 
     async def delete_protocol(self, request) -> Tuple[bool,int,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
-                                              for each in request.metadata.visited.vals]
+                                              for each in request.metadata.visited]
         
         neighbours_traverse = self.__owner_map.get(request.payload.key)
         was_owner = True
@@ -226,7 +229,8 @@ class ClusterHandler:
                 
                 if ack > request.metadata.replica:
                     request.metadata.replica = ack
-                    request.metadata.visited = visited
+                    del request.metadata.visited[:]
+                    request.metada.visited.extend(visited)
 
             if request.metadata.replica == self.MAX_REPLICAS:
                 break # Halt

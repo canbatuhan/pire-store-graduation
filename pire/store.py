@@ -133,7 +133,8 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             else: # Could not read from the local, extend the protocol
                 request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
                 success, value, visited = await self.cluster_handler.read_protocol(request)
-                request.metada.visited = visited
+                del request.metadata.visited[:]
+                request.metada.visited.extend(visited)
             
             statemachine.trigger(Event.DONE)
             return pirestore_pb2.ReadAck(
@@ -192,7 +193,8 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                     ack, visited = await self.cluster_handler.update_protocol(request)
                     if ack: # Updated in the neighbour
                         request.metadata.replica = ack
-                        request.metadata.visited = visited
+                        del request.metadata.visited[:]
+                        request.metada.visited.extend(visited)
 
             statemachine.trigger(Event.DONE)
 
@@ -220,7 +222,8 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 _, ack, visited = await self.cluster_handler.delete_protocol(request)
                 if ack > request.metadata.replica:
                     request.metadata.replica = ack
-                    request.metadata.visited = visited
+                    del request.metadata.visited[:]
+                    request.metada.visited.extend(visited)
 
             statemachine.trigger(Event.DONE)
 
