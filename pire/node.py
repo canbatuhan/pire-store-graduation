@@ -60,9 +60,12 @@ class PireNode:
     @SERVER.route("/pire/kv/create", methods=['PUT'])
     async def create():
         status_code = 400 # Initially, failure
+        print("getting json")
         data = await request.get_json()
+        print("json:", data)
 
         try: # Try to extract data and run protocol
+            print("reading key and value")
             key   = data.get("key")
             value = data.get("value")
             print("creating '{}':'{}'".format(key, value))
