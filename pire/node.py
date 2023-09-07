@@ -8,13 +8,13 @@ from pire.modules.service import pirestore_pb2
 from pire.util.event      import Event
 
 
-def __address_message(host:str, port:int) -> pirestore_pb2.Address:
+def _address_message(host:str, port:int) -> pirestore_pb2.Address:
     return pirestore_pb2.Address(
         host = host,
         port = port
     )
 
-def __write_message(key:str, value:str, replica:int, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.WriteProtocolMessage:
+def _write_message(key:str, value:str, replica:int, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.WriteProtocolMessage:
     return pirestore_pb2.WriteProtocolMessage(
         payload = pirestore_pb2.WritePayload(
             key   = key,
@@ -26,7 +26,7 @@ def __write_message(key:str, value:str, replica:int, visited:List[pirestore_pb2.
         )
     )
 
-def __read_message(key:str, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.ReadProtocolMessage:
+def _read_message(key:str, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.ReadProtocolMessage:
     return pirestore_pb2.ReadProtocolMessage(
         payload = pirestore_pb2.ReadPayload(
             key = key
@@ -36,7 +36,7 @@ def __read_message(key:str, visited:List[pirestore_pb2.Address]) -> pirestore_pb
         )
     )
 
-def __validate_message(key:str, value:str, version:int) -> pirestore_pb2.ValidateProtocolMessage:
+def _validate_message(key:str, value:str, version:int) -> pirestore_pb2.ValidateProtocolMessage:
     return pirestore_pb2.ValidateProtocolMessage(
         payload = pirestore_pb2.ValidatePayload(
             key     = key,
@@ -78,14 +78,14 @@ class PireNode:
             print("state is now 'WRITING'")
 
             local_success = PireNode.STORE.database.create(key, value)
-            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
+            grpc_visited = [_address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Created successfully in the local
-                grpc_write = __write_message(
+                grpc_write = _write_message(
                     key, value, 1, grpc_visited)
 
             else: # Failed to create
-                grpc_write = __write_message(
+                grpc_write = _write_message(
                     key, value, 0, grpc_visited)
 
             print("initializing the protocol.")
@@ -120,7 +120,7 @@ class PireNode:
             success, value, version = PireNode.STORE.database.read(key)
             
             if success: # Read successfully from the local
-                grpc_validate = __validate_message(key, value, version)
+                grpc_validate = _validate_message(key, value, version)
                 val_value, val_version = await PireNode.STORE.cluster_handler.validate_protocol(grpc_validate)
                 
                 if version < val_version: # Eventual-consistency !
@@ -128,8 +128,8 @@ class PireNode:
                     value = val_value
 
             else: # Failed to read
-                grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
-                grpc_read = __read_message(key, grpc_visited)
+                grpc_visited = [_address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
+                grpc_read = _read_message(key, grpc_visited)
                 success, value, _ = await PireNode.STORE.cluster_handler.read_protocol(grpc_read)
             
             if success: # Success criteria is met
@@ -158,13 +158,13 @@ class PireNode:
             statemachine.trigger(Event.WRITE)
 
             local_success = PireNode.STORE.database.update(key, value)
-            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
+            grpc_visited = [_address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Updated locally
                 status_code = 200
 
             else: # Failed to update
-                grpc_write = __write_message(
+                grpc_write = _write_message(
                     key, value, 0, grpc_visited)
                 ack, _ = await PireNode.STORE.cluster_handler.update_protocol(grpc_write)
             
@@ -191,14 +191,14 @@ class PireNode:
             statemachine.trigger(Event.WRITE)
 
             local_success = PireNode.STORE.database.delete(key)
-            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
+            grpc_visited = [_address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Updated successfully in the local
-                grpc_write = __write_message(
+                grpc_write = _write_message(
                     key, None, 1, grpc_visited)
 
             else: # Failed to update
-                grpc_write = __write_message(
+                grpc_write = _write_message(
                     key, None, 0, grpc_visited)
 
             success, _, _ = await PireNode.STORE.cluster_handler.delete_protocol(grpc_write)
