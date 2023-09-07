@@ -45,7 +45,7 @@ def __validate_message(key:object, value:object, version:int) -> pirestore_pb2.V
     )
 
 class PireNode:
-    SERVER:Quart    = Quart(__name__)
+    SERVER:Quart    = None # Quart-app
     STORE:PireStore = None # pire-store
 
     def __init__(self, config_path:str=None) -> None:
@@ -55,10 +55,11 @@ class PireNode:
         self.__server_cfg = cfg.get("server")
         self.__store_cfg  = cfg.get("store")
 
-        self.STORE  = PireStore(self.__store_cfg)
+        PireNode.SERVER = Quart(__name__)
+        PireNode.STORE  = PireStore(self.__store_cfg)
 
     @SERVER.route("/pire/kv/create", methods=['PUT'])
-    async def create(self):
+    async def create():
         status_code = 400 # Initially, failure
         data = await request.get_json()
 
@@ -66,12 +67,12 @@ class PireNode:
             key   = data.get("key")
             value = data.get("value")
 
-            statemachine = self.STORE.get_state_machine(key)
+            statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 
-            local_success = self.STORE.database.create(key, value)
-            grpc_visited = [__address_message(self.STORE.HOST, self.STORE.PORT)]
+            local_success = PireNode.STORE.database.create(key, value)
+            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Created successfully in the local
                 grpc_write = __write_message(
@@ -81,7 +82,7 @@ class PireNode:
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
 
-            success, _ = await self.STORE.cluster_handler.create_protocol(grpc_write)
+            success, _ = await PireNode.STORE.cluster_handler.create_protocol(grpc_write)
             if success: # Success criteria is met
                 status_code = 200
 
@@ -94,7 +95,7 @@ class PireNode:
         
 
     @SERVER.route("/pire/kv/read", methods=['PUT'])
-    async def read(self):
+    async def read():
         status_code = 400  # Initially, failure
         value       = None # Initially, no value is found
         data = await request.get_json()
@@ -102,24 +103,24 @@ class PireNode:
         try: # Try to extract data and run protocol
             key   = data.get("key")
 
-            statemachine = self.STORE.get_state_machine(key)
+            statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.READ)
             statemachine.trigger(Event.READ)
 
-            success, value, version = self.STORE.database.read(key)
+            success, value, version = PireNode.STORE.database.read(key)
             
             if success: # Read successfully from the local
                 grpc_validate = __validate_message(key, value, version)
-                val_value, val_version = await self.STORE.cluster_handler.validate_protocol(grpc_validate)
+                val_value, val_version = await PireNode.STORE.cluster_handler.validate_protocol(grpc_validate)
                 
                 if version < val_version: # Eventual-consistency !
-                    self.STORE.database.validate(key, val_value, val_version)
+                    PireNode.STORE.database.validate(key, val_value, val_version)
                     value = val_value
 
             else: # Failed to read
-                grpc_visited = [__address_message(self.STORE.HOST, self.STORE.PORT)]
+                grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
                 grpc_read = __read_message(key, grpc_visited)
-                success, value, _ = await self.STORE.cluster_handler.read_protocol(grpc_read)
+                success, value, _ = await PireNode.STORE.cluster_handler.read_protocol(grpc_read)
             
             if success: # Success criteria is met
                 status_code = 200
@@ -134,7 +135,7 @@ class PireNode:
             response=str(value))
 
     @SERVER.route("/pire/kv/update", methods=['PUT'])
-    async def update(self):
+    async def update():
         status_code = 400 # Initially, failure
         data = await request.get_json()
 
@@ -142,12 +143,12 @@ class PireNode:
             key   = data.get("key")
             value = data.get("value")
 
-            statemachine = self.STORE.get_state_machine(key)
+            statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 
-            local_success = self.STORE.database.update(key, value)
-            grpc_visited = [__address_message(self.STORE.HOST, self.STORE.PORT)]
+            local_success = PireNode.STORE.database.update(key, value)
+            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Updated locally
                 status_code = 200
@@ -155,7 +156,7 @@ class PireNode:
             else: # Failed to update
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
-                ack, _ = await self.STORE.cluster_handler.update_protocol(grpc_write)
+                ack, _ = await PireNode.STORE.cluster_handler.update_protocol(grpc_write)
             
                 if ack: # Success criteria is met
                     status_code = 200
@@ -168,19 +169,19 @@ class PireNode:
         return Response(status=status_code)
 
     @SERVER.route("/pire/kv/delete", methods=['PUT'])
-    async def delete(self):
+    async def delete():
         status_code = 400 # Initially, failure
         data = await request.get_json()
 
         try: # Try to extract data and run protocol
             key   = data.get("key")
 
-            statemachine = self.STORE.get_state_machine(key)
+            statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
 
-            local_success = self.STORE.database.delete(key)
-            grpc_visited = [__address_message(self.STORE.HOST, self.STORE.PORT)]
+            local_success = PireNode.STORE.database.delete(key)
+            grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
 
             if local_success: # Updated successfully in the local
                 grpc_write = __write_message(
@@ -190,7 +191,7 @@ class PireNode:
                 grpc_write = __write_message(
                     key, None, 0, grpc_visited)
 
-            success, _, _ = await self.STORE.cluster_handler.delete_protocol(grpc_write)
+            success, _, _ = await PireNode.STORE.cluster_handler.delete_protocol(grpc_write)
             if success: # Success criteria is met
                 status_code = 200
 
@@ -203,8 +204,8 @@ class PireNode:
 
     async def main(self) -> None:
         await asyncio.gather(
-            self.STORE.run(),
-            self.SERVER.run_task(
+            PireNode.STORE.run(),
+            PireNode.SERVER.run_task(
                 debug = False,
                 host  = "0.0.0.0",
                 port  = self.__server_cfg.get("port"))
