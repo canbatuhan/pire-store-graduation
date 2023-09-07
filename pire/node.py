@@ -96,7 +96,8 @@ class PireNode:
 
             statemachine.trigger(Event.DONE)
 
-        except: # Failed to read request or state machine polling exception
+        except Exception as exception: # Failed to read request or state machine polling exception
+            print(exception.with_traceback(None))
             print("failed at some point")
             pass
 
