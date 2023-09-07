@@ -7,7 +7,7 @@ TEMPLATE="192.168.1.12"
 PASSWORD="tolga.halit.batu"
 
 # Commands
-CD="cd /home/batuhan/pire-store/pire/docs"
+CD="cd /home/batuhan/pire-store/docs"
 DISPLAY="sudo cat local.db"
 EXIT="exit"
 

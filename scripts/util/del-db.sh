@@ -8,7 +8,7 @@ TEMPLATE="192.168.1.12"
 DB_FILENAME="local.db"
 
 # Commands
-CD="cd /home/batuhan/pire-store/pire/docs"
+CD="cd /home/batuhan/pire-store/docs"
 DELETE_DB="sudo rm $DB_FILENAME"
 EXIT="exit"
 

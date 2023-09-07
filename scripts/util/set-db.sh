@@ -8,7 +8,7 @@ TEMPLATE="192.168.1.12"
 DB_FILENAME="local.db"
 
 # Commands
-CD="cd /home/batuhan/pire-store/pire/docs"
+CD="cd /home/batuhan/pire-store/docs"
 CREATE_DB="sudo touch $DB_FILENAME"
 PERMISSION="sudo chmod 777 *.*"
 CLEAR_DB="echo {} > $DB_FILENAME"
