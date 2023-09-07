@@ -61,21 +61,15 @@ class PireNode:
     @SERVER.route("/pire/kv/create", methods=['PUT'])
     async def create():
         status_code = 400 # Initially, failure
-        print("getting json")
         data = await request.get_json()
-        print("json:", data)
 
         try: # Try to extract data and run protocol
-            print("reading key and value")
             key   = str(data.get("key"))
             value = str(data.get("value"))
-            print("creating '{}':'{}'".format(key, value))
 
             statemachine = PireNode.STORE.get_state_machine(key)
-            print("polling the state machine")
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
-            print("state is now 'WRITING'")
 
             local_success = PireNode.STORE.database.create(key, value)
             grpc_visited = [_address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
@@ -88,17 +82,14 @@ class PireNode:
                 grpc_write = _write_message(
                     key, value, 0, grpc_visited)
 
-            print("initializing the protocol.")
             success, _ = await PireNode.STORE.cluster_handler.create_protocol(grpc_write)
             if success: # Success criteria is met
                 status_code = 200
-            print("protocol is done.")
 
             statemachine.trigger(Event.DONE)
 
         except Exception as exception: # Failed to read request or state machine polling exception
             print(exception.with_traceback(None))
-            print("failed at some point")
             pass
 
         return Response(status=status_code)

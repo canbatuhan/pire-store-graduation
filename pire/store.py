@@ -240,17 +240,21 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         pair_count = self.database.get_size()
         timeout = self.MIN_DUMP_TIMEOUT
         while True: # Infinite loop
+            print("wait to dump...")
             await asyncio.sleep(timeout)
             try: # Try to dump
                 if self.database.get_size() == pair_count:
                     self.database.save()
+                    print("dumped...")
                     timeout = self.MIN_DUMP_TIMEOUT
                 else: # Database is active
                     timeout *= 2
+                    print("database is active")
                     if timeout > self.MAX_DUMP_TIMEOUT:
                         timeout = self.MAX_DUMP_TIMEOUT
             except: # Failed to dump
                 timeout *= 2
+                print("failed to dump")
                 if timeout > self.MAX_DUMP_TIMEOUT:
                     timeout = self.MAX_DUMP_TIMEOUT
             pair_count = self.database.get_size()
