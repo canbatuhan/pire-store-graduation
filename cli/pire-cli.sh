@@ -42,6 +42,7 @@ send_request() {
     local method=$3
     local key=$4
     local value=$5
+    echo "send to http://$address$path"
     curl -X "$method" "http://$address$path" -d "key=$key&value=$value"
 }
 
