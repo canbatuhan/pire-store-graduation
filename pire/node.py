@@ -88,7 +88,8 @@ class PireNode:
 
             statemachine.trigger(Event.DONE)
 
-        except: # Failed to read request or state machine polling exception
+        except Exception as e: # Failed to read request or state machine polling exception
+            print(e.with_traceback(None))
             pass
 
         return Response(status=status_code)

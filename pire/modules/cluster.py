@@ -11,7 +11,7 @@ class ClusterHandler:
     
     def __init__(self, neighbours:List[Tuple[str,int]], max_replicas:int, min_replicas:int) -> None:
         self.__neighbours = neighbours
-        self.__owner_map:Dict[bytes, List[Tuple[str,int]]] = dict()
+        self.__owner_map:Dict[str, List[Tuple[str,int]]] = dict()
         self.__stub_map:Dict[Tuple[str,int], pirestore_pb2_grpc.PireStoreStub] = dict()
         self.MAX_REPLICAS = max_replicas
         self.MIN_REPLICAS = min_replicas
@@ -38,8 +38,8 @@ class ClusterHandler:
                 _ = await stub.Greet(grpc_greet)
                 self.__stub_map.update({addr:stub})
 
-            except Exception as exception:
-                pass # Channel is broken or error in code
+            except: # Channel is broken or error in code
+                pass
     
     async def greet_protocol_receiver(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
