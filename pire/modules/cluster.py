@@ -78,11 +78,12 @@ class ClusterHandler:
                     request.metadata.replica = ack
 
                     # Remember the pair's location
-                    if self.__owner_map.get(request.payload.key) == None:
+                    pair = self.__owner_map.get(request.payload.key)
+                    if pair == None:
                         self.__owner_map.update({request.payload.key: [addr]})
 
                     else: # Entry already exists
-                        self.__owner_map[request.payload.key].append(addr)
+                        pair.append(addr)
             
             if request.metadata.replica == self.MAX_REPLICAS:
                 break # Halt
