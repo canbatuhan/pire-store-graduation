@@ -65,10 +65,13 @@ class PireNode:
         try: # Try to extract data and run protocol
             key   = data.get("key")
             value = data.get("value")
+            print("creating '{}':'{}'".format(key, value))
 
             statemachine = PireNode.STORE.get_state_machine(key)
+            print("polling the state machine")
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
+            print("state is now 'WRITING'")
 
             local_success = PireNode.STORE.database.create(key, value)
             grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
@@ -81,13 +84,16 @@ class PireNode:
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
 
+            print("initializing the protocol.")
             success, _ = await PireNode.STORE.cluster_handler.create_protocol(grpc_write)
             if success: # Success criteria is met
                 status_code = 200
+            print("protocol is done.")
 
             statemachine.trigger(Event.DONE)
 
         except: # Failed to read request or state machine polling exception
+            print("failed at some point")
             pass
 
         return Response(status=status_code)

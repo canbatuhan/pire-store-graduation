@@ -44,8 +44,9 @@ class ClusterHandler:
     
     async def greet_protocol_receiver(self, addr:Tuple[str,int]) -> None:
         addr_as_str = lambda h, p : "{}:{}".format(h, p)
-        channel = grpc.aio.insecure_channel(addr_as_str(*addr))
-        self.__stub_map[addr] = pirestore_pb2_grpc.PireStoreStub(channel)
+        stub = pirestore_pb2_grpc.PireStoreStub(
+            grpc.aio.insecure_channel(addr_as_str(*addr)))
+        self.__stub_map.update({addr:stub})
 
     """ GREET Protocol Implementation Ends """
 
