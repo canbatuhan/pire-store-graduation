@@ -45,7 +45,7 @@ def __validate_message(key:object, value:object, version:int) -> pirestore_pb2.V
     )
 
 class PireNode:
-    SERVER:Quart    = None # Quart-app
+    SERVER:Quart    = Quart(__name__)
     STORE:PireStore = None # pire-store
 
     def __init__(self, config_path:str=None) -> None:
@@ -55,8 +55,7 @@ class PireNode:
         self.__server_cfg = cfg.get("server")
         self.__store_cfg  = cfg.get("store")
 
-        PireNode.SERVER = Quart(__name__)
-        PireNode.STORE  = PireStore(self.__store_cfg)
+        PireNode.STORE = PireStore(self.__store_cfg)
 
     @SERVER.route("/pire/kv/create", methods=['PUT'])
     async def create():
