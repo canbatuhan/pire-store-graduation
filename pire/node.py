@@ -57,7 +57,7 @@ class PireNode:
 
         self.STORE  = PireStore(self.__store_cfg)
 
-    @SERVER.route("/pire/kv/create", methods=['POST'])
+    @SERVER.route("/pire/kv/create", methods=['PUT'])
     async def create(self):
         status_code = 400 # Initially, failure
         data = await request.get_json()
@@ -93,7 +93,7 @@ class PireNode:
         return Response(status=status_code)
         
 
-    @SERVER.route("/pire/kv/read", methods=['POST'])
+    @SERVER.route("/pire/kv/read", methods=['PUT'])
     async def read(self):
         status_code = 400  # Initially, failure
         value       = None # Initially, no value is found
@@ -133,7 +133,7 @@ class PireNode:
             status=status_code,
             response=str(value))
 
-    @SERVER.route("/pire/kv/update", methods=['POST'])
+    @SERVER.route("/pire/kv/update", methods=['PUT'])
     async def update(self):
         status_code = 400 # Initially, failure
         data = await request.get_json()
@@ -167,7 +167,7 @@ class PireNode:
 
         return Response(status=status_code)
 
-    @SERVER.route("/pire/kv/delete", methods=['POST'])
+    @SERVER.route("/pire/kv/delete", methods=['PUT'])
     async def delete(self):
         status_code = 400 # Initially, failure
         data = await request.get_json()
