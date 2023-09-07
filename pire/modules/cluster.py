@@ -71,7 +71,7 @@ class ClusterHandler:
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
             if addr not in visited_addrs: # Unvisited neighbour
-                ack, visited = await self.__call_Create(request)
+                ack, visited = await self.__call_Create(addr, request)
                 if ack > request.metadata.replica:
                     del request.metadata.visited[:]
                     request.metada.visited.extend(visited)

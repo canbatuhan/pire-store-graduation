@@ -24,6 +24,6 @@ store:
     max_poll_time: 0.050000000
 
   database:
-    path: "./docs/local.db"
+    path: "/home/batuhan/pire-store/docs/local.db"
     min_poll_time: 0.025
     max_poll_time: 8.0
