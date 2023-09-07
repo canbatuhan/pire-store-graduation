@@ -91,7 +91,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             success = self.database.create(key, value)
             
             if success: # Creates in the local
-                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
+                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
                 request.metadata.replica += 1
 
                 # Creates in the neighbour
@@ -131,7 +131,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                     value = val_value
         
             else: # Could not read from the local, extend the protocol
-                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
+                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
                 success, value, visited = await self.cluster_handler.read_protocol(request)
                 del request.metadata.visited[:]
                 request.metada.visited.extend(visited)
@@ -188,7 +188,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 request.metadata.replica += 1
 
             else: # Failed in the local
-                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
+                request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
                 if request.metadata.replica < self.MAX_REPLICAS:
                     ack, visited = await self.cluster_handler.update_protocol(request)
                     if ack: # Updated in the neighbour
@@ -217,7 +217,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             if success: # Updates in the local
                 request.metadata.replica += 1
 
-            request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.GRPC_PORT)])
+            request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
             if request.metadata.replica < self.MAX_REPLICAS:
                 _, ack, visited = await self.cluster_handler.delete_protocol(request)
                 if ack > request.metadata.replica:

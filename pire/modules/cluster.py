@@ -39,7 +39,6 @@ class ClusterHandler:
                 self.__stub_map.update({addr:stub})
 
             except Exception as exception:
-                print(exception.with_traceback(None))
                 pass # Channel is broken or error in code
     
     async def greet_protocol_receiver(self, addr:Tuple[str,int]) -> None:
@@ -59,9 +58,7 @@ class ClusterHandler:
             response = await stub.Create(request)
             return response.ack, response.visited
         
-        # Channel is broken or error in the code
-        except Exception as exception:
-            print(exception.with_traceback(None))
+        except: # Channel is broken or error in the code
             return request.metadata.replica, request.metadata.visited
 
     async def create_protocol(self, request:pirestore_pb2.WriteProtocolMessage) -> Tuple[bool,int]:
@@ -96,18 +93,16 @@ class ClusterHandler:
 
     """ READ Protocol Implementation Starts """
 
-    async def __call_Read(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,bytes,List[pirestore_pb2.Address]]:
+    async def __call_Read(self, neigh_addr:Tuple[str,int], request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,str,List[pirestore_pb2.Address]]:
         try: # Try to send a message
             stub = self.__stub_map.get(neigh_addr)
             response = await stub.Read(request)
             return response.success, response.value, response.visited
         
-        # Channel is broken or error in the code
-        except Exception as exception:
-            print(exception.with_traceback(None))
+        except: # Channel is broken or error in the code
             return False, None, request.visited
 
-    async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,bytes,List[pirestore_pb2.Address]]:
+    async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,str,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
                                               for each in request.metadata.visited]
         
@@ -134,12 +129,10 @@ class ClusterHandler:
             response = await stub.Validate(request)
             return response.value, response.version
         
-        # Channel is broken or error in the code
-        except Exception as exception:
-            print(exception.with_traceback(None))
+        except: # Channel is broken or error in the code
             return request.payload.value, response.payload.version
 
-    async def validate_protocol(self, request) -> Tuple[bytes,int]:
+    async def validate_protocol(self, request) -> Tuple[str,int]:
         owner_neighbours = self.__owner_map.get(request.payload.key)
         if owner_neighbours != None: # The pair is stored in a neighbour
             addr = random.choice(owner_neighbours)
@@ -159,9 +152,7 @@ class ClusterHandler:
             response = stub.Update(request)
             return response.replica, response.visited
         
-        # Channel is broken or error in code
-        except Exception as exception:
-            print(exception.with_traceback(None))
+        except: # Channel is broken or error in the code
             return request.metadata.replica, request.metadata.visited
 
     async def update_protocol(self, request) -> Tuple[int,List[pirestore_pb2.Address]]:
@@ -209,9 +200,7 @@ class ClusterHandler:
             response = stub.Delete(request)
             return response.replica, response.visited
         
-        # Channel is broken or error in code
-        except Exception as exception:
-            print(exception.with_traceback(None))
+        except: # Channel is broken or error in the code
             return request.metadata.replica, request.metadata.visited   
 
     async def delete_protocol(self, request) -> Tuple[bool,int,List[pirestore_pb2.Address]]:
