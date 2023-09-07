@@ -42,7 +42,7 @@ send_request() {
     local method=$3
     local key=$4
     local value=$5
-    curl -X "$method" "http://$address$path" -d "key=$key&value=$value"
+    curl -X "$method" "http://$address$path" -H "Content-Type: application/json" -d '{"key"=$key, "value"=$value}'
 }
 
 parse_yaml "$CONFIG_FILE" "$VAR_NAME"

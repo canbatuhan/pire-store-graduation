@@ -45,7 +45,7 @@ def __validate_message(key:object, value:object, version:int) -> pirestore_pb2.V
     )
 
 class PireNode:
-    SERVER:Quart    = None # Quart-app
+    SERVER:Quart    = Quart(__name__)
     STORE:PireStore = None # pire-store
 
     def __init__(self, config_path:str=None) -> None:
@@ -55,21 +55,26 @@ class PireNode:
         self.__server_cfg = cfg.get("server")
         self.__store_cfg  = cfg.get("store")
 
-        PireNode.SERVER = Quart(__name__)
-        PireNode.STORE  = PireStore(self.__store_cfg)
+        PireNode.STORE = PireStore(self.__store_cfg)
 
     @SERVER.route("/pire/kv/create", methods=['PUT'])
     async def create():
         status_code = 400 # Initially, failure
+        print("getting json")
         data = await request.get_json()
+        print("json:", data)
 
         try: # Try to extract data and run protocol
+            print("reading key and value")
             key   = data.get("key")
             value = data.get("value")
+            print("creating '{}':'{}'".format(key, value))
 
             statemachine = PireNode.STORE.get_state_machine(key)
+            print("polling the state machine")
             statemachine.poll(Event.WRITE)
             statemachine.trigger(Event.WRITE)
+            print("state is now 'WRITING'")
 
             local_success = PireNode.STORE.database.create(key, value)
             grpc_visited = [__address_message(PireNode.STORE.HOST, PireNode.STORE.PORT)]
@@ -82,13 +87,16 @@ class PireNode:
                 grpc_write = __write_message(
                     key, value, 0, grpc_visited)
 
+            print("initializing the protocol.")
             success, _ = await PireNode.STORE.cluster_handler.create_protocol(grpc_write)
             if success: # Success criteria is met
                 status_code = 200
+            print("protocol is done.")
 
             statemachine.trigger(Event.DONE)
 
         except: # Failed to read request or state machine polling exception
+            print("failed at some point")
             pass
 
         return Response(status=status_code)
