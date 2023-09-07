@@ -2,7 +2,7 @@ import pickledb
 import struct
 from typing import Tuple
 
-MODE = "<sH" # Little endian (bytes-(high)word)
+MODE = "<8sH" # Little endian (8-byte string | 2-byte uint)
 
 class LocalDatabase:
     def __init__(self, local_db_path:str) -> None:
@@ -18,27 +18,31 @@ class LocalDatabase:
     def save(self) -> None:
         self.__db.dump()
 
-    def create(self, key:bytes, value:bytes) -> bool:
-        self.__db.set(key, struct.pack(MODE, value, 0))
+    def create(self, key:str, value:str) -> bool:
+        data = struct.pack(MODE, value.encode(), 0)
+        self.__db.set(key, data)
         self.__size += 1
         return True
 
-    def read(self, key:bytes) -> Tuple[bool,bytes,int]:
+    def read(self, key:str) -> Tuple[bool,str,int]:
         entry = self.__db.get(key)
         if not entry: # Key does not exist
             return False, None, None
         value, version = struct.unpack(MODE, entry)
+        value = value.decode().rstrip("\x00")
         return True, value, version
 
-    def validate(self, key:bytes, value:bytes, version:int) -> Tuple[bool]:
-        self.__db.set(key, struct.pack(MODE, value, version))
+    def validate(self, key:str, value:str, version:int) -> Tuple[bool]:
+        data = struct.pack(MODE, value.encode(), version)
+        self.__db.set(key, data)
         return True
 
-    def update(self, key:bytes, value:bytes) -> bool:
+    def update(self, key:str, value:str) -> bool:
         entry = self.__db.get(key)
         if entry: # Key exists
-            value, version = struct.unpack(MODE, entry)
-            self.__db.set(key, struct.pack(MODE, value, version+1))
+            _, version = struct.unpack(MODE, entry)
+            data = struct.pack(MODE, value.encode(), version+1)
+            self.__db.set(key, data)
             return True
         else: # Key does not exist
             return False

@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\":\n\x14GreetProtocolMessage\x12\"\n\x06sender\x18\x01 \x01(\x0b\x32\x12.pirestore.Address\"\x07\n\x05\x45mpty\"l\n\x14WriteProtocolMessage\x12(\n\x07payload\x18\x01 \x01(\x0b\x32\x17.pirestore.WritePayload\x12*\n\x08metadata\x18\x02 \x01(\x0b\x32\x18.pirestore.WriteMetadata\"i\n\x13ReadProtocolMessage\x12\'\n\x07payload\x18\x01 \x01(\x0b\x32\x16.pirestore.ReadPayload\x12)\n\x08metadata\x18\x02 \x01(\x0b\x32\x17.pirestore.ReadMetadata\"F\n\x17ValidateProtocolMessage\x12+\n\x07payload\x18\x01 \x01(\x0b\x32\x1a.pirestore.ValidatePayload\"<\n\x08WriteAck\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\r\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"L\n\x07ReadAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x0b\n\x03val\x18\x02 \x01(\x0c\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"+\n\x0bValidateAck\x12\x0b\n\x03val\x18\x01 \x01(\x0c\x12\x0f\n\x07\x63ounter\x18\x02 \x01(\r\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\r\"(\n\x0cWritePayload\x12\x0b\n\x03key\x18\x03 \x01(\x0c\x12\x0b\n\x03val\x18\x04 \x01(\x0c\"E\n\rWriteMetadata\x12\x0f\n\x07replica\x18\x01 \x01(\r\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"\x1a\n\x0bReadPayload\x12\x0b\n\x03key\x18\x01 \x01(\x0c\"3\n\x0cReadMetadata\x12#\n\x07visited\x18\x01 \x03(\x0b\x32\x12.pirestore.Address\"<\n\x0fValidatePayload\x12\x0b\n\x03key\x18\x01 \x01(\x0c\x12\x0b\n\x03val\x18\x02 \x01(\x0c\x12\x0f\n\x07\x63ounter\x18\x03 \x01(\r2\x97\x03\n\tPireStore\x12<\n\x05Greet\x12\x1f.pirestore.GreetProtocolMessage\x1a\x10.pirestore.Empty\"\x00\x12@\n\x06\x43reate\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12<\n\x04Read\x12\x1e.pirestore.ReadProtocolMessage\x1a\x12.pirestore.ReadAck\"\x00\x12H\n\x08Validate\x12\".pirestore.ValidateProtocolMessage\x1a\x16.pirestore.ValidateAck\"\x00\x12@\n\x06Update\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12@\n\x06\x44\x65lete\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x62\x06proto3'
+  serialized_pb=b'\n\x0fpirestore.proto\x12\tpirestore\":\n\x14GreetProtocolMessage\x12\"\n\x06sender\x18\x01 \x01(\x0b\x32\x12.pirestore.Address\"\x07\n\x05\x45mpty\"l\n\x14WriteProtocolMessage\x12(\n\x07payload\x18\x01 \x01(\x0b\x32\x17.pirestore.WritePayload\x12*\n\x08metadata\x18\x02 \x01(\x0b\x32\x18.pirestore.WriteMetadata\"i\n\x13ReadProtocolMessage\x12\'\n\x07payload\x18\x01 \x01(\x0b\x32\x16.pirestore.ReadPayload\x12)\n\x08metadata\x18\x02 \x01(\x0b\x32\x17.pirestore.ReadMetadata\"F\n\x17ValidateProtocolMessage\x12+\n\x07payload\x18\x01 \x01(\x0b\x32\x1a.pirestore.ValidatePayload\"<\n\x08WriteAck\x12\x0b\n\x03\x61\x63k\x18\x01 \x01(\r\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"N\n\x07ReadAck\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\r\n\x05value\x18\x02 \x01(\t\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"-\n\x0bValidateAck\x12\r\n\x05value\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\r\"%\n\x07\x41\x64\x64ress\x12\x0c\n\x04host\x18\x01 \x01(\t\x12\x0c\n\x04port\x18\x02 \x01(\r\"*\n\x0cWritePayload\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\"E\n\rWriteMetadata\x12\x0f\n\x07replica\x18\x01 \x01(\r\x12#\n\x07visited\x18\n \x03(\x0b\x32\x12.pirestore.Address\"\x1a\n\x0bReadPayload\x12\x0b\n\x03key\x18\x01 \x01(\t\"3\n\x0cReadMetadata\x12#\n\x07visited\x18\x01 \x03(\x0b\x32\x12.pirestore.Address\">\n\x0fValidatePayload\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\r2\x97\x03\n\tPireStore\x12<\n\x05Greet\x12\x1f.pirestore.GreetProtocolMessage\x1a\x10.pirestore.Empty\"\x00\x12@\n\x06\x43reate\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12<\n\x04Read\x12\x1e.pirestore.ReadProtocolMessage\x1a\x12.pirestore.ReadAck\"\x00\x12H\n\x08Validate\x12\".pirestore.ValidateProtocolMessage\x1a\x16.pirestore.ValidateAck\"\x00\x12@\n\x06Update\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x12@\n\x06\x44\x65lete\x12\x1f.pirestore.WriteProtocolMessage\x1a\x13.pirestore.WriteAck\"\x00\x62\x06proto3'
 )
 
 
@@ -247,9 +247,9 @@ _READACK = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='val', full_name='pirestore.ReadAck.val', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      name='value', full_name='pirestore.ReadAck.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -273,7 +273,7 @@ _READACK = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=450,
-  serialized_end=526,
+  serialized_end=528,
 )
 
 
@@ -286,14 +286,14 @@ _VALIDATEACK = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='val', full_name='pirestore.ValidateAck.val', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      name='value', full_name='pirestore.ValidateAck.value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='counter', full_name='pirestore.ValidateAck.counter', index=1,
+      name='version', full_name='pirestore.ValidateAck.version', index=1,
       number=2, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -311,8 +311,8 @@ _VALIDATEACK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=528,
-  serialized_end=571,
+  serialized_start=530,
+  serialized_end=575,
 )
 
 
@@ -350,8 +350,8 @@ _ADDRESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=573,
-  serialized_end=610,
+  serialized_start=577,
+  serialized_end=614,
 )
 
 
@@ -365,15 +365,15 @@ _WRITEPAYLOAD = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='pirestore.WritePayload.key', index=0,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='val', full_name='pirestore.WritePayload.val', index=1,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      name='value', full_name='pirestore.WritePayload.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -389,8 +389,8 @@ _WRITEPAYLOAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=612,
-  serialized_end=652,
+  serialized_start=616,
+  serialized_end=658,
 )
 
 
@@ -428,8 +428,8 @@ _WRITEMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=654,
-  serialized_end=723,
+  serialized_start=660,
+  serialized_end=729,
 )
 
 
@@ -443,8 +443,8 @@ _READPAYLOAD = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='pirestore.ReadPayload.key', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
@@ -460,8 +460,8 @@ _READPAYLOAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=725,
-  serialized_end=751,
+  serialized_start=731,
+  serialized_end=757,
 )
 
 
@@ -492,8 +492,8 @@ _READMETADATA = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=753,
-  serialized_end=804,
+  serialized_start=759,
+  serialized_end=810,
 )
 
 
@@ -507,20 +507,20 @@ _VALIDATEPAYLOAD = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='key', full_name='pirestore.ValidatePayload.key', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='val', full_name='pirestore.ValidatePayload.val', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
+      name='value', full_name='pirestore.ValidatePayload.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='counter', full_name='pirestore.ValidatePayload.counter', index=2,
+      name='version', full_name='pirestore.ValidatePayload.version', index=2,
       number=3, type=13, cpp_type=3, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -538,8 +538,8 @@ _VALIDATEPAYLOAD = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=806,
-  serialized_end=866,
+  serialized_start=812,
+  serialized_end=874,
 )
 
 _GREETPROTOCOLMESSAGE.fields_by_name['sender'].message_type = _ADDRESS
@@ -675,8 +675,8 @@ _PIRESTORE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=869,
-  serialized_end=1276,
+  serialized_start=877,
+  serialized_end=1284,
   methods=[
   _descriptor.MethodDescriptor(
     name='Greet',

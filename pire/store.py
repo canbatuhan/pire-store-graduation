@@ -59,12 +59,12 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         
         # Replicated State Machine
         self.sample_statemachine = ReplicatedStateMachine(sm_min_poll_time, sm_max_poll_time)
-        self.statemachine_map:Dict[bytes,ReplicatedStateMachine] = dict()
+        self.statemachine_map:Dict[str,ReplicatedStateMachine] = dict()
         
         # Local Database
         self.database = LocalDatabase(database_file_path)
 
-    def get_state_machine(self, key:bytes) -> ReplicatedStateMachine:
+    def get_state_machine(self, key:str) -> ReplicatedStateMachine:
         statemachine = self.statemachine_map.get(key)
         if statemachine == None: # Create if not exists
             statemachine = copy.deepcopy(self.sample_statemachine)
@@ -163,7 +163,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             # Eventual-consistency !
             if version < req_version or (version == req_version and value != req_value):
                 self.database.validate(key, req_value, req_version)
-                value = req_value
+                value   = req_value
                 version = req_version
 
             statemachine.trigger(Event.DONE)

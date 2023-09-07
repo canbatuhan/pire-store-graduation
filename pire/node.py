@@ -7,7 +7,6 @@ from pire.store           import PireStore
 from pire.modules.service import pirestore_pb2
 from pire.util.event      import Event
 
-ENCODING = "utf-8"
 
 def __address_message(host:str, port:int) -> pirestore_pb2.Address:
     return pirestore_pb2.Address(
@@ -15,7 +14,7 @@ def __address_message(host:str, port:int) -> pirestore_pb2.Address:
         port = port
     )
 
-def __write_message(key:bytes, value:bytes, replica:int, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.WriteProtocolMessage:
+def __write_message(key:str, value:str, replica:int, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.WriteProtocolMessage:
     return pirestore_pb2.WriteProtocolMessage(
         payload = pirestore_pb2.WritePayload(
             key   = key,
@@ -27,7 +26,7 @@ def __write_message(key:bytes, value:bytes, replica:int, visited:List[pirestore_
         )
     )
 
-def __read_message(key:bytes, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.ReadProtocolMessage:
+def __read_message(key:str, visited:List[pirestore_pb2.Address]) -> pirestore_pb2.ReadProtocolMessage:
     return pirestore_pb2.ReadProtocolMessage(
         payload = pirestore_pb2.ReadPayload(
             key = key
@@ -37,7 +36,7 @@ def __read_message(key:bytes, visited:List[pirestore_pb2.Address]) -> pirestore_
         )
     )
 
-def __validate_message(key:bytes, value:bytes, version:int) -> pirestore_pb2.ValidateProtocolMessage:
+def __validate_message(key:str, value:str, version:int) -> pirestore_pb2.ValidateProtocolMessage:
     return pirestore_pb2.ValidateProtocolMessage(
         payload = pirestore_pb2.ValidatePayload(
             key     = key,
@@ -68,8 +67,8 @@ class PireNode:
 
         try: # Try to extract data and run protocol
             print("reading key and value")
-            key   = str(data.get("key")).encode(ENCODING)
-            value = str(data.get("value")).encode(ENCODING)
+            key   = str(data.get("key"))
+            value = str(data.get("value"))
             print("creating '{}':'{}'".format(key, value))
 
             statemachine = PireNode.STORE.get_state_machine(key)
@@ -111,7 +110,7 @@ class PireNode:
         data = await request.get_json()
         
         try: # Try to extract data and run protocol
-            key = str(data.get("key")).encode(ENCODING)
+            key   = str(data.get("key"))
 
             statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.READ)
@@ -150,8 +149,8 @@ class PireNode:
         data = await request.get_json()
 
         try: # Try to extract data and run protocol
-            key   = str(data.get("key")).encode(ENCODING)
-            value = str(data.get("value")).encode(ENCODING)
+            key   = str(data.get("key"))
+            value = str(data.get("value"))
 
             statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.WRITE)
@@ -184,7 +183,7 @@ class PireNode:
         data = await request.get_json()
 
         try: # Try to extract data and run protocol
-            key = str(data.get("key")).encode(ENCODING)
+            key   = str(data.get("key"))
 
             statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.WRITE)
