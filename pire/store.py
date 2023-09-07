@@ -65,7 +65,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
         self.database = LocalDatabase(database_file_path)
 
     def get_state_machine(self, key:bytes) -> ReplicatedStateMachine:
-        statemachine = statemachine
+        statemachine = self.statemachine_map.get(key)
         if statemachine == None: # Create if not exists
             statemachine = copy.deepcopy(self.sample_statemachine)
             statemachine.start()
