@@ -2,7 +2,7 @@ server:
   port: 8090
 
 store:
-  host: "192.168.1.123"
+  host: "192.168.1.124"
   port: 8080
 
   replication:

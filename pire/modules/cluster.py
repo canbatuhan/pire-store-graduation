@@ -37,7 +37,6 @@ class ClusterHandler:
                 
                 _ = await stub.Greet(grpc_greet)
                 self.__stub_map.update({addr:stub})
-                print("greeted with", addr, "talking on", stub)
 
             except Exception as exception:
                 print(exception.with_traceback(None))
@@ -48,7 +47,6 @@ class ClusterHandler:
         stub = pirestore_pb2_grpc.PireStoreStub(
             grpc.aio.insecure_channel(addr_as_str(*addr)))
         self.__stub_map.update({addr:stub})
-        print("greeted with", addr, "talking on", stub)
 
     """ GREET Protocol Implementation Ends """
 
