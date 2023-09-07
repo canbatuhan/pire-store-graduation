@@ -19,13 +19,13 @@ class LocalDatabase:
         self.__db.dump()
 
     def create(self, key:str, value:str) -> bool:
-        data = struct.pack(MODE, value.encode(), 0)
-        self.__db.set(key, data)
+        entry = struct.pack(MODE, value.encode(), 0)
+        self.__db.set(key, entry.decode())
         self.__size += 1
         return True
 
     def read(self, key:str) -> Tuple[bool,str,int]:
-        entry = self.__db.get(key)
+        entry = self.__db.get(key).encode()
         if not entry: # Key does not exist
             return False, None, None
         value, version = struct.unpack(MODE, entry)
@@ -33,16 +33,16 @@ class LocalDatabase:
         return True, value, version
 
     def validate(self, key:str, value:str, version:int) -> Tuple[bool]:
-        data = struct.pack(MODE, value.encode(), version)
-        self.__db.set(key, data)
+        entry = struct.pack(MODE, value.encode(), version)
+        self.__db.set(key, entry.decode())
         return True
 
     def update(self, key:str, value:str) -> bool:
-        entry = self.__db.get(key)
+        entry = self.__db.get(key).encode()
         if entry: # Key exists
             _, version = struct.unpack(MODE, entry)
-            data = struct.pack(MODE, value.encode(), version+1)
-            self.__db.set(key, data)
+            new_entry  = struct.pack(MODE, value.encode(), version+1)
+            self.__db.set(key, new_entry.decode())
             return True
         else: # Key does not exist
             return False
