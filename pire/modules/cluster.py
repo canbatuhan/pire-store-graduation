@@ -11,7 +11,7 @@ class ClusterHandler:
     
     def __init__(self, neighbours:List[Tuple[str,int]], max_replicas:int, min_replicas:int) -> None:
         self.__neighbours = neighbours
-        self.__owner_map:Dict[str, List[Tuple[str,int]]] = dict()
+        self.owner_map:Dict[str, List[Tuple[str,int]]] = dict()
         self.__stub_map:Dict[Tuple[str,int], pirestore_pb2_grpc.PireStoreStub] = dict()
         self.MAX_REPLICAS = max_replicas
         self.MIN_REPLICAS = min_replicas
@@ -75,9 +75,9 @@ class ClusterHandler:
                     request.metadata.replica = ack
 
                     # Remember the pair's location
-                    pair = self.__owner_map.get(request.payload.key)
-                    if pair == None:
-                        self.__owner_map.update({request.payload.key: [addr]})
+                    pair = self.owner_map.get(request.payload.key)
+                    if pair == None: # First record of the entry
+                        self.owner_map.update({request.payload.key: [addr]})
 
                     else: # Entry already exists
                         pair.append(addr)
@@ -133,7 +133,7 @@ class ClusterHandler:
             return request.payload.value, response.payload.version
 
     async def validate_protocol(self, request) -> Tuple[str,int]:
-        owner_neighbours = self.__owner_map.get(request.payload.key)
+        owner_neighbours = self.owner_map.get(request.payload.key)
         if owner_neighbours != None: # The pair is stored in a neighbour
             addr = random.choice(owner_neighbours)
             val_value, val_response = await self.__call_Validate(addr, request)
@@ -159,7 +159,7 @@ class ClusterHandler:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
                                               for each in request.metadata.visited]
         """
-        neighbours_traverse = self.__owner_map.get(request.payload.key)
+        neighbours_traverse = self.owner_map.get(request.payload.key)
         if neighbours_traverse == None: # The node is not an owner
             random.shuffle(self.__neighbours)
             neighbours_traverse = self.__neighbours
@@ -207,7 +207,7 @@ class ClusterHandler:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
                                               for each in request.metadata.visited]
         
-        neighbours_traverse = self.__owner_map.get(request.payload.key)
+        neighbours_traverse = self.owner_map.get(request.payload.key)
         was_owner = True
         if neighbours_traverse == None: # The node is not an owner
             random.shuffle(self.__neighbours)
@@ -227,7 +227,7 @@ class ClusterHandler:
                 break # Halt
         
         if was_owner: # Remove entry if one of the owners
-            self.__owner_map.pop(request.payload.key)
+            self.owner_map.pop(request.payload.key)
 
         return request.metadata.replica >= self.MIN_REPLICAS, request.metadata.replica, request.metadata.visited
 

@@ -95,6 +95,17 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
                 request.metadata.replica += 1
 
+                # Remember the pair's location
+                pair = self.cluster_handler.owner_map.get(request.payload.key)
+                addr = (request.metadata.sender.host, request.metadata.sender.port)
+                
+                if pair == None: # First record of the entry
+                    self.cluster_handler.owner_map.update(
+                        {request.payload.key: [addr]})
+                    
+                else: # Entry already exists
+                    pair.append(addr)
+
                 # Creates in the neighbour
                 if request.metadata.replica < self.MAX_REPLICAS:
                     _, ack = await self.cluster_handler.create_protocol(request)
