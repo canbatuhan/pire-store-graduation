@@ -154,7 +154,8 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 value   = value,
                 visited = request.metada.visited)
 
-        except: # State machine polling timeout
+        except Exception as e: # State machine polling timeout
+            print("Read:", e.with_traceback(None))
             return pirestore_pb2.ReadAck(
                 success = False,
                 value   = None,
@@ -181,7 +182,8 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             statemachine.trigger(Event.DONE)
             return pirestore_pb2.ValidateAck(value=value, version=version)
 
-        except: # State machine polling timeout
+        except Exception as e: # State machine polling timeout
+            print("Validate:", e.with_traceback(None))
             return pirestore_pb2.ValidateAck(
                 value   = request.payload.value,
                 version = request.payload.version)

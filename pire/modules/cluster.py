@@ -99,7 +99,8 @@ class ClusterHandler:
             response = await stub.Read(request)
             return response.success, response.value, response.visited
         
-        except: # Channel is broken or error in the code
+        except Exception as e: # Channel is broken or error in the code
+            print("__call_Read:", e.with_traceback(None))
             return False, None, request.visited
 
     async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,str,List[pirestore_pb2.Address]]:
@@ -129,7 +130,8 @@ class ClusterHandler:
             response = await stub.Validate(request)
             return response.value, response.version
         
-        except: # Channel is broken or error in the code
+        except Exception as e: # Channel is broken or error in the code
+            print("__call_Validate:", e.with_traceback(None))
             return request.payload.value, response.payload.version
 
     async def validate_protocol(self, request) -> Tuple[str,int]:
