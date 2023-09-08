@@ -71,7 +71,7 @@ class ClusterHandler:
                 ack, visited = await self.__call_Create(addr, request)
                 if ack > request.metadata.replica:
                     del request.metadata.visited[:]
-                    request.metada.visited.extend(visited)
+                    request.metadata.visited.extend(visited)
                     request.metadata.replica = ack
 
                     # Remember the pair's location
@@ -112,7 +112,7 @@ class ClusterHandler:
                 success, value, visited = await self.__call_Read(addr, request)
                 if not success: # Pair can not found
                     del request.metadata.visited[:]
-                    request.metada.visited.extend(visited)
+                    request.metadata.visited.extend(visited)
                 else: # Pair found
                     break
 
@@ -181,7 +181,7 @@ class ClusterHandler:
             if addr not in visited_addrs:
                 ack, visited = await self.__call_Update(addr, request)
                 del request.metadata.visited[:]
-                request.metada.visited.extend(visited)
+                request.metadata.visited.extend(visited)
 
                 if ack: # Updated in the neighbour
                     request.metadata.replica = ack
@@ -221,7 +221,7 @@ class ClusterHandler:
                 if ack > request.metadata.replica:
                     request.metadata.replica = ack
                     del request.metadata.visited[:]
-                    request.metada.visited.extend(visited)
+                    request.metadata.visited.extend(visited)
 
             if request.metadata.replica == self.MAX_REPLICAS:
                 break # Halt
