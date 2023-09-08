@@ -18,6 +18,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
     # Node Constants
     HOST             = str()
     PORT             = int()
+    SM_FILE_PATH     = str()
     MIN_DUMP_TIMEOUT = float()
     MAX_DUMP_TIMEOUT = float()
     ENCODING         = str()
@@ -134,7 +135,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 request.metadata.visited.extend([pirestore_pb2.Address(host=self.HOST, port=self.PORT)])
                 success, value, visited = await self.cluster_handler.read_protocol(request)
                 del request.metadata.visited[:]
-                request.metada.visited.extend(visited)
+                request.metadata.visited.extend(visited)
             
             statemachine.trigger(Event.DONE)
             return pirestore_pb2.ReadAck(
@@ -194,7 +195,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                     if ack: # Updated in the neighbour
                         request.metadata.replica = ack
                         del request.metadata.visited[:]
-                        request.metada.visited.extend(visited)
+                        request.metadata.visited.extend(visited)
 
             statemachine.trigger(Event.DONE)
 
@@ -223,7 +224,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
                 if ack > request.metadata.replica:
                     request.metadata.replica = ack
                     del request.metadata.visited[:]
-                    request.metada.visited.extend(visited)
+                    request.metadata.visited.extend(visited)
 
             statemachine.trigger(Event.DONE)
 

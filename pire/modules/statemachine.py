@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 import time
 from smpai.fsm import FiniteStateMachine
 
@@ -7,11 +8,11 @@ from pire.util.exception import PollingTimeoutException
 SM_CONFIG_PATH = "pire/resource/statemachine.json"
 
 class ReplicatedStateMachine:
-    MIN_POLL_TIME = float()
-    MAX_POLL_TIME = float()
+    MIN_POLL_TIME    = float()
+    MAX_POLL_TIME    = float()
 
     def __init__(self, min_poll_time:float, max_poll_time:float) -> None:
-        self.__machine  = FiniteStateMachine(SM_CONFIG_PATH)
+        self.__machine     = FiniteStateMachine(SM_CONFIG_PATH)
         self.MIN_POLL_TIME = min_poll_time
         self.MAX_POLL_TIME = max_poll_time
 
