@@ -138,8 +138,9 @@ class ClusterHandler:
         owner_neighbours = self.owner_map.get(request.payload.key)
         if owner_neighbours != None: # The pair is stored in a neighbour
             addr = random.choice(owner_neighbours)
-            val_value, val_response = await self.__call_Validate(addr, request)
-            return val_value, val_response
+            print("Validating on:", addr)
+            val_value, val_version = await self.__call_Validate(addr, request)
+            return val_value, val_version
         else: # No neighbours storing the pair (unusual)
             return request.payload.value, request.payload.version
 
