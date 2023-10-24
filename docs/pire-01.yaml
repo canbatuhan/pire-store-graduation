@@ -6,17 +6,13 @@ store:
   port: 8080
 
   replication:
-    max_replicas: 3
-    min_replicas: 2
+    max_replicas: 2
+    min_replicas: 1
 
   neighbours:
     - host: "192.168.1.120"
       port: 8080
     - host: "192.168.1.122"
-      port: 8080
-    - host: "192.168.1.123"
-      port: 8080
-    - host: "192.168.1.124"
       port: 8080
 
   statemachine: 
