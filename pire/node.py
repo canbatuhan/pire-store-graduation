@@ -101,7 +101,7 @@ class PireNode:
         data = await request.get_json()
         
         try: # Try to extract data and run protocol
-            key   = str(data.get("key"))
+            key = str(data.get("key"))
 
             statemachine = PireNode.STORE.get_state_machine(key)
             statemachine.poll(Event.READ)

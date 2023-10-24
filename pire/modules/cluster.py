@@ -113,9 +113,10 @@ class ClusterHandler:
         success, value = False, None
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
-            print("Visited", visited_addrs)
+            print("Visited:", visited_addrs)
             if addr not in visited_addrs: # Unvisited neighbour
                 success, value, visited = await self.__call_Read(addr, request)
+                print("Visited ACK:", visited)
                 if not success: # Pair can not found
                     del request.metadata.visited[:]
                     request.metadata.visited.extend(visited)
@@ -142,8 +143,10 @@ class ClusterHandler:
 
     async def validate_protocol(self, request) -> Tuple[str,int]:
         owner_neighbours = self.owner_map.get(request.payload.key)
+        print("Owners:", owner_neighbours)
         if owner_neighbours != None: # The pair is stored in a neighbour
             addr = random.choice(owner_neighbours)
+            print("Validating on:", addr)
             val_value, val_version = await self.__call_Validate(addr, request)
             return val_value, val_version
         else: # No neighbours storing the pair (unusual)
