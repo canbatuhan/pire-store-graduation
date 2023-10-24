@@ -72,6 +72,8 @@ class ClusterHandler:
         for addr in self.__neighbours:
             if addr not in visited_addrs: # Unvisited neighbour
                 ack, visited = await self.__call_Create(addr, request)
+                print("Visited ACK:", visited)
+                
                 if ack > request.metadata.replica:
                     del request.metadata.visited[:]
                     request.metadata.visited.extend(visited)
