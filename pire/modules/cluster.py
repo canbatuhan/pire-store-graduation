@@ -113,6 +113,7 @@ class ClusterHandler:
         success, value = False, None
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
+            print("Visited", visited_addrs)
             if addr not in visited_addrs: # Unvisited neighbour
                 success, value, visited = await self.__call_Read(addr, request)
                 if not success: # Pair can not found
