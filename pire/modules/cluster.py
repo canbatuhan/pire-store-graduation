@@ -100,8 +100,7 @@ class ClusterHandler:
             return response.success, response.value, response.visited
         
         except Exception as e: # Channel is broken or error in the code
-            print("__call_Read:", e.with_traceback(None))
-            return False, None, request.visited
+            return False, None, request.metadata.visited
 
     async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,str,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion

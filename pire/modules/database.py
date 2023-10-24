@@ -27,7 +27,7 @@ class LocalDatabase:
     def read(self, key:str) -> Tuple[bool,str,int]:
         entry = self.__db.get(key)
         if not entry: # Key does not exist
-            return False, None, None
+            return False, "", -1
         entry = entry.encode()
         value, version = struct.unpack(MODE, entry)
         value = value.decode().rstrip("\x00")

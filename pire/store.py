@@ -158,7 +158,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             print("Read:", e.with_traceback(None))
             return pirestore_pb2.ReadAck(
                 success = False,
-                value   = None,
+                value   = "",
                 visited = request.metadata.visited)
 
     async def Validate(self, request, context):
