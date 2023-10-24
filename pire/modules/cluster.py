@@ -16,7 +16,7 @@ class ClusterHandler:
         self.MAX_REPLICAS = max_replicas
         self.MIN_REPLICAS = min_replicas
 
-    def __reformat_visited_addrs(visited_addrs:List[pirestore_pb2.Address]) -> List[Tuple[str,int]]:
+    def __reformat_visited_addrs(self, visited_addrs:List[pirestore_pb2.Address]) -> List[Tuple[str,int]]:
         return [(each.host, each.port) # Format conversion
                 for each in visited_addrs]
 
