@@ -106,7 +106,7 @@ class ClusterHandler:
     async def read_protocol(self, request:pirestore_pb2.ReadProtocolMessage) -> Tuple[bool,str,List[pirestore_pb2.Address]]:
         visited_addrs:List[Tuple[str,int]] = [(each.host, each.port) # Format conversion
                                               for each in request.metadata.visited]
-        
+        success, value = False, None
         random.shuffle(self.__neighbours)
         for addr in self.__neighbours:
             if addr not in visited_addrs: # Unvisited neighbour
@@ -138,7 +138,6 @@ class ClusterHandler:
         owner_neighbours = self.owner_map.get(request.payload.key)
         if owner_neighbours != None: # The pair is stored in a neighbour
             addr = random.choice(owner_neighbours)
-            print("Validating on:", addr)
             val_value, val_version = await self.__call_Validate(addr, request)
             return val_value, val_version
         else: # No neighbours storing the pair (unusual)

@@ -152,7 +152,7 @@ class PireStore(pirestore_pb2_grpc.PireStoreServicer):
             return pirestore_pb2.ReadAck(
                 success = success,
                 value   = value,
-                visited = request.metada.visited)
+                visited = request.metadata.visited)
 
         except Exception as e: # State machine polling timeout
             print("Read:", e.with_traceback(None))
